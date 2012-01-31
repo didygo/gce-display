@@ -25,7 +25,7 @@ import javafx.stage.WindowEvent;
 public class Controller1 extends Application {
     // Variables du système d'affichage
 
-    Group root, cercles;
+    Group root, cercles,menu;
     ArrayList<CircleObject> circleObjectArray;
     private double kinectPosX = 0;
     private double kinectPosY = 0;
@@ -53,10 +53,12 @@ public class Controller1 extends Application {
     double distOpacity = 100;
     //variablr pour demultiplier le deplacement
     double multTranslation = 1.4;
+    //les TiltMenu
+    TiltMenu tmenu;
 
     public enum Etats {
 
-        FREE, SUN_SELECTED, CHANGE_SIZE, CHANGE_OPACITY, SUPER_FREE
+        FREE, SUN_SELECTED, CHANGE_SIZE, CHANGE_OPACITY, SUPER_FREE, MENU
     }
     private Etats etat;
 
@@ -105,18 +107,22 @@ public class Controller1 extends Application {
         adresseBus = "169.254.255.255:2010";//"10.3.8.255:2010";
         kinectServer = new KinectServer1(this, adresseBus, windowSizeX, windowSizeY);
         //////////////////////////////////////////////////////////////
-        gestionEvenementsSouris(scene);
+        //gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
-        etat = Etats.SUPER_FREE;
-        basket = new CircleBasket(root, windowSizeX+40, windowSizeY);
-        basket.hide();
+        etat = Etats.FREE;
+        basket = new CircleBasket(root, windowSizeX + 40, windowSizeY);
+
         circleObjectArray = new ArrayList();
         cercles = new Group();
-        root.getChildren().add(cercles);
+        menu = new Group();
+        root.getChildren().addAll(cercles,menu);
         ////////////////////////////////////////////////////////
 
         connectionTool = new ConnectionTool(root, windowSizeX - 50, windowSizeY - 50, kinectServer);
         manConnectionTool = new ManConnectionTool(root, windowSizeX - 150, windowSizeY - 50, kinectServer);
+
+
+        
 
 
 
@@ -164,6 +170,20 @@ public class Controller1 extends Application {
                         // impossible
 
                         break;
+                    case MENU:
+                        switch(tmenu.selected()){
+                            case OPACITY:
+                                etat = Etats.CHANGE_OPACITY;
+                                break;
+                            case SIZE:
+                                etat = Etats.CHANGE_SIZE;
+                                break;
+                            case CANCEL:
+                                etat = Etats.SUN_SELECTED;
+                                break;
+                        }
+                        menu.getChildren().removeAll(menu.getChildren());
+                        break;
                 }
             }
         });
@@ -206,6 +226,7 @@ public class Controller1 extends Application {
                         }
                         etat = Etats.FREE;
                         break;
+
                 }
             }
         });
@@ -262,6 +283,10 @@ public class Controller1 extends Application {
                         kinectPosXResize = x;
                         kinectPosYOpacity = y;
                         kinectPosYResize = y;
+                        break;
+                    case MENU:
+                        kinectPosX = x;
+                        kinectPosY = y;
                         break;
                 }
             }
@@ -346,10 +371,10 @@ public class Controller1 extends Application {
                     case SUPER_FREE:
                         etat = Etats.FREE;
                         basket.show();
-                        
+
                         break;
                     case CHANGE_OPACITY:
-                      
+
 
                         break;
                     case CHANGE_SIZE:
@@ -359,18 +384,69 @@ public class Controller1 extends Application {
                     case FREE:
                         etat = Etats.SUPER_FREE;
                         basket.hide();
-                        if (illuminateIndex >= 0) circleObjectArray.get(illuminateIndex).toNormal();
-                        
+                        if (illuminateIndex >= 0) {
+                            circleObjectArray.get(illuminateIndex).toNormal();
+                        }
+
                         illuminateIndex = -2;
                         break;
 
                     case SUN_SELECTED:
 
-                       
+
                         break;
                 }
             }
         });
+    }
+
+    public void eventFingerAngle(final double d) {
+       
+            
+            Platform.runLater(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    switch (etat) {
+                        case SUPER_FREE:
+
+
+                            break;
+                        case CHANGE_OPACITY:
+
+
+                            break;
+                        case CHANGE_SIZE:
+                            // Interdit
+                            break;
+
+                        case FREE:
+
+                            break;
+
+                        case SUN_SELECTED:
+                            tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
+
+                            tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.SIZE, TiltMenu.Type.CANCEL);
+                            tmenu.setIndicator(d);
+                            tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
+                            tmenu.setVisible(true);
+                            etat = Etats.MENU;
+                            menu.getChildren().add(tmenu.getMenu());
+
+
+                            break;
+                        case MENU:
+                            tmenu.setIndicator(d);
+                            break;
+
+                    }
+
+
+                }
+            });
+        
     }
 
     private void translateSunShader(double x, double y) {

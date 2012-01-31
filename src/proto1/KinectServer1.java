@@ -168,6 +168,22 @@ public class KinectServer1 implements KinectServer {
         } catch (IvyException ex) {
             Logger.getLogger(KinectServer1.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        try {
+            bus.bindMsg("^KINECT_FINGER_ANGLE=(.*)", new IvyMessageListener() {
+
+                @Override
+                public void receive(IvyClient client, String[] args) {
+                    System.out.println("KINECT_FINGER_ANGLE=" + args[0]);
+
+                    ctrl.eventFingerAngle(Math.toRadians((double)Integer.parseInt(args[0])));
+                }
+            });
+
+
+        } catch (IvyException ex) {
+            Logger.getLogger(KinectServer1.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
 
 
