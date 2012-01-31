@@ -25,10 +25,11 @@ import javafx.stage.WindowEvent;
 public class Controller1 extends Application {
     // Variables du système d'affichage
 
-    Group root, cercles,menu;
+    Group root, cercles, menu;
     ArrayList<CircleObject> circleObjectArray;
     private double kinectPosX = 0;
     private double kinectPosY = 0;
+    private double kinectPosZ = 0;
     private double windowSizeY, windowSizeX, kinectWindowSizeX, kinectWindowSizeY;
     private String adresseBus;
     private KinectServer1 kinectServer;
@@ -115,14 +116,14 @@ public class Controller1 extends Application {
         circleObjectArray = new ArrayList();
         cercles = new Group();
         menu = new Group();
-        root.getChildren().addAll(cercles,menu);
+        root.getChildren().addAll(cercles, menu);
         ////////////////////////////////////////////////////////
 
         connectionTool = new ConnectionTool(root, windowSizeX - 50, windowSizeY - 50, kinectServer);
         manConnectionTool = new ManConnectionTool(root, windowSizeX - 150, windowSizeY - 50, kinectServer);
 
 
-        
+
 
 
 
@@ -171,7 +172,7 @@ public class Controller1 extends Application {
 
                         break;
                     case MENU:
-                        switch(tmenu.selected()){
+                        switch (tmenu.selected()) {
                             case OPACITY:
                                 etat = Etats.CHANGE_OPACITY;
                                 break;
@@ -234,12 +235,13 @@ public class Controller1 extends Application {
 
     }
 
-    public void eventKinectMove(final double x, final double y) {
+    public void eventKinectMove(final double x, final double y, final double z) {
         System.out.println(etat);
         Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
+             
                 switch (etat) {
                     case SUPER_FREE:
 
@@ -247,20 +249,24 @@ public class Controller1 extends Application {
                     case CHANGE_OPACITY:
                         kinectPosX = x;
                         kinectPosY = y;
+                        kinectPosZ = z;
                         if (testGuardOpacity()) {
                             etat = Etats.SUN_SELECTED;
                         }
+                        majOpacity(z);
                         //interdit
                         break;
                     case CHANGE_SIZE:
                         kinectPosX = x;
                         kinectPosY = y;
-                        //interdit
+                        kinectPosZ = z;
+                        majSize(z);
                         break;
 
                     case FREE:
                         kinectPosX = x;
                         kinectPosY = y;
+                        kinectPosZ = z;
                         majFeedback(x, y);
                         //attention au passage des coordonnées 640*480
 
@@ -279,6 +285,7 @@ public class Controller1 extends Application {
                         translateSunShader(x - kinectPosX, y - kinectPosY);
                         kinectPosX = x;
                         kinectPosY = y;
+                        kinectPosZ = z;
                         kinectPosXOpacity = x;
                         kinectPosXResize = x;
                         kinectPosYOpacity = y;
@@ -287,6 +294,8 @@ public class Controller1 extends Application {
                     case MENU:
                         kinectPosX = x;
                         kinectPosY = y;
+                        kinectPosZ = z;
+
                         break;
                 }
             }
@@ -401,52 +410,52 @@ public class Controller1 extends Application {
     }
 
     public void eventFingerAngle(final double d) {
-       
-            
-            Platform.runLater(new Runnable() {
-
-                @Override
-                public void run() {
-
-                    switch (etat) {
-                        case SUPER_FREE:
 
 
-                            break;
-                        case CHANGE_OPACITY:
+        Platform.runLater(new Runnable() {
+
+            @Override
+            public void run() {
+
+                switch (etat) {
+                    case SUPER_FREE:
 
 
-                            break;
-                        case CHANGE_SIZE:
-                            // Interdit
-                            break;
-
-                        case FREE:
-
-                            break;
-
-                        case SUN_SELECTED:
-                            tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
-
-                            tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.SIZE, TiltMenu.Type.CANCEL);
-                            tmenu.setIndicator(d);
-                            tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
-                            tmenu.setVisible(true);
-                            etat = Etats.MENU;
-                            menu.getChildren().add(tmenu.getMenu());
+                        break;
+                    case CHANGE_OPACITY:
 
 
-                            break;
-                        case MENU:
-                            tmenu.setIndicator(d);
-                            break;
+                        break;
+                    case CHANGE_SIZE:
+                        // Interdit
+                        break;
 
-                    }
+                    case FREE:
 
+                        break;
+
+                    case SUN_SELECTED:
+                        tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
+
+                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.SIZE, TiltMenu.Type.CANCEL);
+                        tmenu.setIndicator(d);
+                        tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
+                        tmenu.setVisible(true);
+                        etat = Etats.MENU;
+                        menu.getChildren().add(tmenu.getMenu());
+
+
+                        break;
+                    case MENU:
+                        tmenu.setIndicator(d);
+                        break;
 
                 }
-            });
-        
+
+
+            }
+        });
+
     }
 
     private void translateSunShader(double x, double y) {
@@ -503,15 +512,6 @@ public class Controller1 extends Application {
         return tempIndex;
     }
 
-    private void eraseInvisibleSun() {
-        for (int i = 0; i < circleObjectArray.size(); i++) {
-            if (cercles.getChildren().get(i).getOpacity() == 0) {
-                cercles.getChildren().remove(i);
-                circleObjectArray.remove(i);
-                i--;
-            }
-        }
-    }
 
     private boolean testGuardOpacity() {
         // teste si la main est en dehors de la sphère de centre (kinectPosXOpacity,kinectPosYOpacity) et de rayon r = opacityGuard

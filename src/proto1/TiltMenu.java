@@ -69,6 +69,9 @@ public class TiltMenu {
                 case SIZE:
                     qArray.get(i).setType(Type.SIZE);
                     break;
+                case CANCEL:
+                    qArray.get(i).setType(Type.CANCEL);
+                    break;
             }
         }
         totalG.getChildren().add(line);

@@ -140,13 +140,16 @@ public class KinectServer1 implements KinectServer {
         }
 
         try {
-            bus.bindMsg("^KINECT_POSITION X=(.*) Y=(.*)", new IvyMessageListener() {
+            bus.bindMsg("^KINECT_POSITION X=(.*) Y=(.*) Z=(.*)", new IvyMessageListener() {
 
                 @Override
                 public void receive(IvyClient client, String[] args) {
                     //System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1]);
 
-                    ctrl.eventKinectMove(((double) Integer.parseInt(args[0])) * windowSizeX / kinectWindowSizeX, ((double) Integer.parseInt(args[1])) * windowSizeY / kinectWindowSizeY);
+                    ctrl.eventKinectMove(
+                            ((double) Integer.parseInt(args[0])) * windowSizeX / kinectWindowSizeX,
+                            ((double) Integer.parseInt(args[1])) * windowSizeY / kinectWindowSizeY,
+                            ((double) Integer.parseInt(args[2])));
                 }
             });
         } catch (IvyException ex) {
