@@ -87,18 +87,18 @@ public class TiltMenu {
         line.setEndX((length + 10) * Math.cos(angle));
         line.setEndY((-length + 10) * Math.sin(angle));
         double tetaQuart = totalAngle / nbPartition;
-        if (angle < initialAngle && angle > initialAngle - totalAngle) {
 
-            for (int i = 0; i < qArray.size(); i++) {
-                double tetaG = initialAngle - tetaQuart * i;
-                if (angle < tetaG && angle > tetaG - tetaQuart) {
-                    qArray.get(i).illuminate(true);
-                } else {
-                    qArray.get(i).illuminate(false);
-                }
 
+        for (int i = 0; i < qArray.size(); i++) {
+            double tetaG = initialAngle - tetaQuart * i;
+            if (angle < tetaG && angle > tetaG - tetaQuart) {
+                qArray.get(i).illuminate(true);
+            } else {
+                qArray.get(i).illuminate(false);
             }
+
         }
+
     }
 
     public void setPosition(double x, double y) {
@@ -161,7 +161,7 @@ public class TiltMenu {
     }
 
     public Type selected() {
-        Type temp = Type.OPACITY;
+        Type temp = Type.CANCEL;
         for (Quarter q : qArray) {
             if (q.illuminated) {
                 switch (q.type) {
@@ -169,7 +169,7 @@ public class TiltMenu {
                         temp = Type.OPACITY;
                         break;
                     case SIZE:
-                        temp= Type.SIZE;
+                        temp = Type.SIZE;
                         break;
                     case CANCEL:
                         temp = Type.CANCEL;

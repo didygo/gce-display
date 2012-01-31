@@ -56,6 +56,9 @@ public class Controller1 extends Application {
     double multTranslation = 1.4;
     //les TiltMenu
     TiltMenu tmenu;
+    
+    //le curseur
+    Curseur curseur;
 
     public enum Etats {
 
@@ -123,6 +126,8 @@ public class Controller1 extends Application {
         manConnectionTool = new ManConnectionTool(root, windowSizeX - 150, windowSizeY - 50, kinectServer);
 
 
+        curseur = new Curseur(root);
+        curseur.changeToLibre();
 
 
 
@@ -131,6 +136,7 @@ public class Controller1 extends Application {
     }
 
     public void handSelect() {
+        curseur.changeToHandClose();
         Platform.runLater(new Runnable() {
 
             @Override
@@ -174,9 +180,17 @@ public class Controller1 extends Application {
                     case MENU:
                         switch (tmenu.selected()) {
                             case OPACITY:
+                                distanceZkinect = kinectPosZ;
+                                limitBack = kinectPosZ + segmentSizeOpacity / 2;
+                                limitFront = kinectPosZ - segmentSizeOpacity / 2;
                                 etat = Etats.CHANGE_OPACITY;
                                 break;
                             case SIZE:
+                                distance2handsKinect = kinectPosZ;
+                                //valeur magique paramétrable
+                                limitLeft = kinectPosZ - segmentSizeResize / 2;
+                                limitRight = kinectPosZ + segmentSizeResize / 2;
+
                                 etat = Etats.CHANGE_SIZE;
                                 break;
                             case CANCEL:
@@ -191,6 +205,7 @@ public class Controller1 extends Application {
     }
 
     public void handUnSelect() {
+        curseur.changeToHandOpen();
         Platform.runLater(new Runnable() {
 
             @Override
@@ -241,7 +256,7 @@ public class Controller1 extends Application {
 
             @Override
             public void run() {
-             
+
                 switch (etat) {
                     case SUPER_FREE:
 
@@ -250,9 +265,9 @@ public class Controller1 extends Application {
                         kinectPosX = x;
                         kinectPosY = y;
                         kinectPosZ = z;
-                        if (testGuardOpacity()) {
-                            etat = Etats.SUN_SELECTED;
-                        }
+                        //if (testGuardOpacity()) {
+                        //  etat = Etats.SUN_SELECTED;
+                        //}
                         majOpacity(z);
                         //interdit
                         break;
@@ -300,6 +315,7 @@ public class Controller1 extends Application {
                 }
             }
         });
+        curseur.setPosition(kinectPosX, kinectPosY);
     }
 
     public void eventKinect2Hands(final double distance) {
@@ -409,8 +425,54 @@ public class Controller1 extends Application {
         });
     }
 
+    public void userDetection(boolean b) {
+        if (b){
+            majFeedback(kinectPosX, kinectPosY);
+            etat = Etats.FREE;
+        }else{
+            curseur.changeToLibre();
+            menu.getChildren().removeAll(menu.getChildren());
+            circleObjectArray.get(illuminateIndex).toNormal();
+            illuminateIndex = -2;
+            etat = Etats.SUPER_FREE;
+        }
+        
+        Platform.runLater(new Runnable() {
+
+            @Override
+            public void run() {
+                switch (etat) {
+                    
+                    case SUPER_FREE:
+
+                        break;
+                    case CHANGE_OPACITY:
+
+
+                        break;
+                    case CHANGE_SIZE:
+                        // Interdit
+                        break;
+
+                    case FREE:
+
+                        break;
+
+                    case SUN_SELECTED:
+
+
+                        break;
+                    case MENU:
+                        break;
+
+                }
+            }
+        });
+    }
+
     public void eventFingerAngle(final double d) {
 
+        curseur.changeToFingerOn();
 
         Platform.runLater(new Runnable() {
 
@@ -424,10 +486,24 @@ public class Controller1 extends Application {
                         break;
                     case CHANGE_OPACITY:
 
+                        tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
 
+                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.SIZE, TiltMenu.Type.CANCEL);
+                        tmenu.setIndicator(d);
+                        tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
+                        tmenu.setVisible(true);
+                        etat = Etats.MENU;
+                        menu.getChildren().add(tmenu.getMenu());
                         break;
                     case CHANGE_SIZE:
-                        // Interdit
+                        tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
+
+                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.SIZE, TiltMenu.Type.CANCEL);
+                        tmenu.setIndicator(d);
+                        tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
+                        tmenu.setVisible(true);
+                        etat = Etats.MENU;
+                        menu.getChildren().add(tmenu.getMenu());
                         break;
 
                     case FREE:
@@ -512,13 +588,14 @@ public class Controller1 extends Application {
         return tempIndex;
     }
 
-
     private boolean testGuardOpacity() {
         // teste si la main est en dehors de la sphère de centre (kinectPosXOpacity,kinectPosYOpacity) et de rayon r = opacityGuard
         return (Math.sqrt((kinectPosX - kinectPosXOpacity) * (kinectPosX - kinectPosXOpacity) + (kinectPosY - kinectPosYOpacity) * (kinectPosY - kinectPosYOpacity)) > opacityGuard);
     }
 
     private void majSize(double distance) {
+
+
         if (distance < limitLeft) {
             circleObjectArray.get(illuminateIndex).changeSize(distance - limitLeft);
             limitLeft = distance;
