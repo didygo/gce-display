@@ -66,6 +66,9 @@ public class Curseur {
         curseur.setVisible(true);
         curseur.setImage(new Image("Images/curseurs/mainFermee.png"));
     }
+    public void setVisible(boolean b){
+        curseur.setVisible(b);
+    }
 
     public void changeToDessine() {
         curseur.setVisible(true);

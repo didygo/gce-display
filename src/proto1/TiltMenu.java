@@ -7,6 +7,8 @@ package proto1;
 import java.util.ArrayList;
 import java.util.Collection;
 import javafx.scene.Group;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
@@ -26,6 +28,7 @@ public class TiltMenu {
     private ArrayList<Quarter> qArray;
     private Line line;
     private Group totalG;
+    private Group imgGroup;
 
     public enum Type {
 
@@ -40,6 +43,7 @@ public class TiltMenu {
         line.setStrokeWidth(5);
         this.length = length;
         this.totalG = new Group();
+        this. imgGroup = new Group();
         this.initialAngle = initialAngle;
         this.totalAngle = totalAngle;
 
@@ -61,20 +65,26 @@ public class TiltMenu {
                     -(length / Math.cos(tetaQuart / 2)) * Math.sin(tetaG - tetaQuart / 2),
                     length * Math.cos(tetaG - tetaQuart),
                     -length * Math.sin(tetaG - tetaQuart)));
-            totalG.getChildren().add(qArray.get(i).getPath());
+            
             switch (t[i]) {
                 case OPACITY:
+                    
                     qArray.get(i).setType(Type.OPACITY);
+                    
+                    qArray.get(i).setImg("Images/menu/opacity.png", (3*length/4)* Math.cos(tetaG - tetaQuart / 2), -(3*length/4)* Math.sin(tetaG - tetaQuart / 2));
                     break;
                 case SIZE:
+                    qArray.get(i).setImg("Images/menu/zoom.png", (3*length/4)* Math.cos(tetaG - tetaQuart / 2), -(3*length/4)* Math.sin(tetaG - tetaQuart / 2));
                     qArray.get(i).setType(Type.SIZE);
                     break;
                 case CANCEL:
+                    qArray.get(i).setImg("Images/menu/cancel.png",(3*length/4)* Math.cos(tetaG - tetaQuart / 2), -(3*length/4)* Math.sin(tetaG - tetaQuart / 2));
                     qArray.get(i).setType(Type.CANCEL);
                     break;
             }
+            totalG.getChildren().addAll(qArray.get(i).getQuarter());
         }
-        totalG.getChildren().add(line);
+        totalG.getChildren().addAll(imgGroup,line);
 
 
     }
@@ -111,9 +121,8 @@ public class TiltMenu {
     }
 
     private class Quarter {
-
-        private double radius;
-        private double length;
+        private Group myGroup;
+        private ImageView img;
         public boolean illuminated;
         private Type type;
         private Path p;
@@ -122,6 +131,8 @@ public class TiltMenu {
         LinearGradient lg = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, stops);
 
         public Quarter(double x0, double y0, double x1, double y1, double x2, double y2) {
+            myGroup = new Group();
+            img = new ImageView();
             p = new Path();
             p.setSmooth(true);
             q = new QuadCurveTo(x1, y1, x2, y2);
@@ -142,8 +153,18 @@ public class TiltMenu {
             p.setFill(lg);
         }
 
-        public Path getPath() {
-            return p;
+        public Group getQuarter() {
+            myGroup.getChildren().removeAll(myGroup.getChildren());
+            myGroup.getChildren().addAll(p);
+            return myGroup;
+        }
+        
+        public void setImg(String s, double x, double y){
+            img.setImage(new Image(s));
+            img.setX(x-img.getImage().getWidth()/2);
+            img.setY(y-img.getImage().getHeight()/2);
+            
+            imgGroup.getChildren().add(img);
         }
 
         public void illuminate(boolean b) {

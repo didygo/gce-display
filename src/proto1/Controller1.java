@@ -25,6 +25,7 @@ import javafx.stage.WindowEvent;
 public class Controller1 extends Application {
     // Variables du système d'affichage
 
+    Stage stage;
     Group root, cercles, menu;
     ArrayList<CircleObject> circleObjectArray;
     private double kinectPosX = 0;
@@ -83,13 +84,13 @@ public class Controller1 extends Application {
         kinectPosYOpacity = 0;
 
         /// 1) Initialisation de la scène graphique//
-        windowSizeX = 1024;
-        windowSizeY = 768;
+        windowSizeX = 1440;
+        windowSizeY = 900;
         kinectWindowSizeX = 640;
         kinectWindowSizeY = 480;
         root = new Group();
         Scene scene = new Scene(root, windowSizeX, windowSizeY);
-        ImageView background = new ImageView(new Image("Images/fonds/ciel2.jpg"));
+        ImageView background = new ImageView(new Image("Images/fonds/ciel3.jpg"));
         //primaryStage.setResizable(false);
         primaryStage.setScene(scene);
         root.getChildren().add(background);
@@ -107,7 +108,7 @@ public class Controller1 extends Application {
 
 
         /// 2) Initialisation du bus de communication inter logiciel ///
-        adresseBus = "169.254.255.255:2010";//"10.3.8.255:2010";
+        adresseBus = "192.168.1.255:2010";//"10.3.8.255:2010";
         kinectServer = new KinectServer1(this, adresseBus, windowSizeX, windowSizeY);
         //////////////////////////////////////////////////////////////
         gestionEvenementsSouris(scene);
@@ -130,14 +131,25 @@ public class Controller1 extends Application {
 
 
 
+        ImageView v = new ImageView(new Image("Images/curseurs/"));
+        v.setX(200);
+        v.setY(200);
+        
 
+
+        Help h = new Help(windowSizeX,windowSizeY);
+        
+        root.getChildren().addAll(v,h.getHelp());
+        primaryStage.setFullScreen(true);
+        
+        
 
     }
 
     public void handSelect() {
         curseur.changeToHandClose();
         Platform.runLater(new Runnable() {
-
+            
             @Override
             public void run() {
                 switch (etat) {
@@ -241,11 +253,16 @@ public class Controller1 extends Application {
                         }
                         etat = Etats.FREE;
                         break;
+                    case MENU:
+                        etat = Etats.FREE;
+                        circleObjectArray.get(illuminateIndex).unSelect();
+                        menu.getChildren().removeAll(menu.getChildren());
+                        break;
 
                 }
             }
         });
-        //eraseInvisibleSun();
+
 
     }
 
@@ -318,7 +335,6 @@ public class Controller1 extends Application {
     }
 
     public void eventKinect2Hands(final double distance) {
-        System.out.println(etat);
         Platform.runLater(new Runnable() {
 
             @Override
@@ -353,7 +369,6 @@ public class Controller1 extends Application {
     }
 
     public void eventHandDepth(final double depth) {
-        System.out.println(etat);
         Platform.runLater(new Runnable() {
 
             @Override
@@ -424,24 +439,26 @@ public class Controller1 extends Application {
         });
     }
 
-    public void userDetection(boolean b) {
-        if (b) {
-            majFeedback(kinectPosX, kinectPosY);
-            etat = Etats.FREE;
-        } else {
-            curseur.changeToLibre();
-            menu.getChildren().removeAll(menu.getChildren());
-            if (illuminateIndex >= 0) {
-                circleObjectArray.get(illuminateIndex).toNormal();
-            }
-            illuminateIndex = -2;
-            etat = Etats.SUPER_FREE;
-        }
+    public void userDetection(final boolean b) {
+
 
         Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
+                if (b) {
+                    majFeedback(kinectPosX, kinectPosY);
+                    etat = Etats.FREE;
+                    curseur.setVisible(true);
+                } else {
+                    curseur.setVisible(false);
+                    menu.getChildren().removeAll(menu.getChildren());
+                    if (illuminateIndex >= 0) {
+                        circleObjectArray.get(illuminateIndex).toNormal();
+                    }
+                    illuminateIndex = -2;
+                    etat = Etats.SUPER_FREE;
+                }
                 switch (etat) {
 
                     case SUPER_FREE:
@@ -489,7 +506,7 @@ public class Controller1 extends Application {
 
                         tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
 
-                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.SIZE, TiltMenu.Type.CANCEL);
+                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.CANCEL, TiltMenu.Type.SIZE);
                         tmenu.setIndicator(d);
                         tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
                         tmenu.setVisible(true);
@@ -499,7 +516,7 @@ public class Controller1 extends Application {
                     case CHANGE_SIZE:
                         tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
 
-                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.SIZE, TiltMenu.Type.CANCEL);
+                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.CANCEL, TiltMenu.Type.SIZE);
                         tmenu.setIndicator(d);
                         tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
                         tmenu.setVisible(true);
@@ -514,7 +531,7 @@ public class Controller1 extends Application {
                     case SUN_SELECTED:
                         tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
 
-                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.SIZE, TiltMenu.Type.CANCEL);
+                        tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.CANCEL, TiltMenu.Type.SIZE);
                         tmenu.setIndicator(d);
                         tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
                         tmenu.setVisible(true);
@@ -549,7 +566,7 @@ public class Controller1 extends Application {
                 illuminateIndex = index;
                 if (illuminateIndex == -1) {
                     basket.handIn();
-                } else if (illuminateIndex>=0){
+                } else if (illuminateIndex >= 0) {
                     basket.handOut();
                     circleObjectArray.get(illuminateIndex).toIlluminate();
                 }
@@ -573,7 +590,7 @@ public class Controller1 extends Application {
             for (int i = 0; i < circleObjectArray.size(); i++) {
 
                 tempCompare = circleObjectArray.get(i).proximity(x, y);
-                if (tempCompare < tempDistance && tempCompare< 100) {
+                if (tempCompare < tempDistance && tempCompare < 100) {
                     tempDistance = tempCompare;
                     tempIndex = i;
                 }
@@ -632,11 +649,12 @@ public class Controller1 extends Application {
 
     private void gestionEvenementsSouris(Scene scene) {
         kinectServer.sendToSelf(true);
+        
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
-
+        
             @Override
             public void handle(MouseEvent me) {
-
+                
                 kinectServer.send("KINECT_HAND_OPENED=false");
 
 
@@ -668,31 +686,23 @@ public class Controller1 extends Application {
             @Override
             public void handle(MouseEvent me) {
 
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeX / windowSizeX) + " Y=" + (int) (me.getY() * kinectWindowSizeY / windowSizeY)+ " Z=0");
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeX / windowSizeX) + " Y=" + (int) (me.getY() * kinectWindowSizeY / windowSizeY) + " Z=0");
             }
         });
 
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            
 
             @Override
             public void handle(KeyEvent arg0) {
-
-                if (arg0.getCode() == KeyCode.UP) {
-                    distSize += 2;
-                    kinectServer.send("KINECT_2HANDS_DISTANCE=" + distSize);
-
-                } else if (arg0.getCode() == KeyCode.DOWN) {
-                    distSize -= 2;
-                    kinectServer.send("KINECT_2HANDS_DISTANCE=" + distSize);
-
-                } else if (arg0.getCode() == KeyCode.LEFT) {
-                    distOpacity -= 2;
-                    kinectServer.send("KINECT_HAND_DEPTH=" + distOpacity);
-                } else if (arg0.getCode() == KeyCode.RIGHT) {
-                    distOpacity += 2;
-                    kinectServer.send("KINECT_HAND_DEPTH=" + distOpacity);
+                if (stage.isFullScreen()){
+                    stage.setFullScreen(false);
+                }else{
+                    stage.setFullScreen(true);
                 }
+                
+                
             }
         });
 
@@ -705,6 +715,7 @@ public class Controller1 extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        stage = primaryStage;
         init(primaryStage);
         primaryStage.show();
     }
