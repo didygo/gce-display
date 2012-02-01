@@ -76,6 +76,7 @@ public class ConnectionTool {
         circExt.setFill(Color.BLACK);
         createPathTransition();
         g.getChildren().addAll(circG, path, etatConnection);
+        initConnection();
 
         etatConnection.setOnMousePressed(new EventHandler<MouseEvent>() {
 
@@ -109,6 +110,8 @@ public class ConnectionTool {
         connected = false;
         etatConnection.setOpacity(1);
         etatConnection.setImage(new Image("Images/connect/kinectOff.png"));
+        initConnection();
+        
         
     }
     private void createPathTransition() {
@@ -133,7 +136,7 @@ public class ConnectionTool {
     public void initConnection() {
         circ.setVisible(true);
         circExt.setVisible(true);
-        etatConnection.setOpacity(0.3);
+        etatConnection.setOpacity(0.4);
         pt.play();
         timer.start();;
         

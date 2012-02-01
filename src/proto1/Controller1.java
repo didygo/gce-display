@@ -53,10 +53,9 @@ public class Controller1 extends Application {
     double distSize = 100;
     double distOpacity = 100;
     //variablr pour demultiplier le deplacement
-    double multTranslation = 1.4;
+    double multTranslation = 1;
     //les TiltMenu
     TiltMenu tmenu;
-    
     //le curseur
     Curseur curseur;
 
@@ -111,7 +110,7 @@ public class Controller1 extends Application {
         adresseBus = "169.254.255.255:2010";//"10.3.8.255:2010";
         kinectServer = new KinectServer1(this, adresseBus, windowSizeX, windowSizeY);
         //////////////////////////////////////////////////////////////
-        //gestionEvenementsSouris(scene);
+        gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
         etat = Etats.FREE;
         basket = new CircleBasket(root, windowSizeX + 40, windowSizeY);
@@ -426,23 +425,25 @@ public class Controller1 extends Application {
     }
 
     public void userDetection(boolean b) {
-        if (b){
+        if (b) {
             majFeedback(kinectPosX, kinectPosY);
             etat = Etats.FREE;
-        }else{
+        } else {
             curseur.changeToLibre();
             menu.getChildren().removeAll(menu.getChildren());
-            circleObjectArray.get(illuminateIndex).toNormal();
+            if (illuminateIndex >= 0) {
+                circleObjectArray.get(illuminateIndex).toNormal();
+            }
             illuminateIndex = -2;
             etat = Etats.SUPER_FREE;
         }
-        
+
         Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
                 switch (etat) {
-                    
+
                     case SUPER_FREE:
 
                         break;
@@ -548,8 +549,7 @@ public class Controller1 extends Application {
                 illuminateIndex = index;
                 if (illuminateIndex == -1) {
                     basket.handIn();
-                } else {
-                    //ça va mal
+                } else if (illuminateIndex>=0){
                     basket.handOut();
                     circleObjectArray.get(illuminateIndex).toIlluminate();
                 }
@@ -568,12 +568,12 @@ public class Controller1 extends Application {
     private int getNearest(double x, double y) {
         double tempDistance = 5000;
         double tempCompare;
-        int tempIndex = -1;
+        int tempIndex = -2;
         if (circleObjectArray.size() > 0) {
             for (int i = 0; i < circleObjectArray.size(); i++) {
 
                 tempCompare = circleObjectArray.get(i).proximity(x, y);
-                if (tempCompare < tempDistance) {
+                if (tempCompare < tempDistance && tempCompare< 100) {
                     tempDistance = tempCompare;
                     tempIndex = i;
                 }
@@ -650,7 +650,7 @@ public class Controller1 extends Application {
                 // System.out.println("KINECT_POSITION SEND X=" + (int) (me.getX()*kinectWindowSizeX/windowSizeX) + " Y=" + (int) (me.getY()*kinectWindowSizeY/windowSizeY ));
 
 
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeX / windowSizeX) + " Y=" + (int) (me.getY() * kinectWindowSizeY / windowSizeY));
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeX / windowSizeX) + " Y=" + (int) (me.getY() * kinectWindowSizeY / windowSizeY) + " Z=0");
             }
         });
 
@@ -668,7 +668,7 @@ public class Controller1 extends Application {
             @Override
             public void handle(MouseEvent me) {
 
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeX / windowSizeX) + " Y=" + (int) (me.getY() * kinectWindowSizeY / windowSizeY));
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeX / windowSizeX) + " Y=" + (int) (me.getY() * kinectWindowSizeY / windowSizeY)+ " Z=0");
             }
         });
 
