@@ -32,14 +32,22 @@ public class Help {
         this.totalGroup = new Group();
         this.background = new Rectangle(windowX, 100, Color.web("#000000", 0.4));
         totalGroup.getChildren().add(background);
+        totalGroup.setVisible(false);
     }
 
     public void addImg(String s, Etats e) {
         array.add(new Option(s, e));
     }
+    public boolean isVisible(){
+        return totalGroup.isVisible();
+    }
 
     public Group getHelp() {
         return totalGroup;
+    }
+    
+    public void setVisible(boolean b){
+        totalGroup.setVisible(b);
     }
 
     public void illuminateOptions(Etats... e) {

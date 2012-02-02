@@ -59,6 +59,8 @@ public class Controller1 extends Application {
     TiltMenu tmenu;
     //le curseur
     Curseur curseur;
+    //le menu d'aide
+    Help help;
 
     public enum Etats {
 
@@ -137,10 +139,14 @@ public class Controller1 extends Application {
         
 
 
-        Help h = new Help(windowSizeX,windowSizeY);
+        help = new Help(windowSizeX,windowSizeY);
+        help.addImg("Images/help/doigtGris.png", Help.Etats.FINGER);
+        help.addImg("Images/help/mainFermeeGris.png", Help.Etats.HAND_CLOSE);
+        help.addImg("Images/help/mainOuverteGris.png", Help.Etats.HAND_OPEN);
+        root.getChildren().addAll(v,help.getHelp());
         
-        root.getChildren().addAll(v,h.getHelp());
-        primaryStage.setFullScreen(true);
+        //primaryStage.setFullScreen(true);
+        
         
         
 
@@ -164,12 +170,14 @@ public class Controller1 extends Application {
                         break;
 
                     case FREE:
+                        help.illuminateOptions();
 
                         if (illuminateIndex >= 0 && circleObjectArray.size() > 0) {
 
                             circleObjectArray.get(illuminateIndex).select();
                             basket.makeItEmpty();
                             etat = Etats.SUN_SELECTED;
+                            help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
 
                         } else if (illuminateIndex == -1) {
                             circleObjectArray.add(new CircleObject(kinectPosX, kinectPosY, cercles));
@@ -180,6 +188,7 @@ public class Controller1 extends Application {
                             circleObjectArray.get(illuminateIndex).select();
                             basket.sunCaught();
                             etat = Etats.SUN_SELECTED;
+                            help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
 
                         }
                         break;
@@ -189,6 +198,7 @@ public class Controller1 extends Application {
 
                         break;
                     case MENU:
+                        help.illuminateOptions(Help.Etats.FINGER, Help.Etats.HAND_OPEN);
                         switch (tmenu.selected()) {
                             case OPACITY:
                                 distanceZkinect = kinectPosZ;
@@ -227,9 +237,11 @@ public class Controller1 extends Application {
                         break;
                     case CHANGE_OPACITY:
                         etat = Etats.FREE;
+                        help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         circleObjectArray.get(illuminateIndex).unSelect();
                         break;
                     case CHANGE_SIZE:
+                        help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         etat = Etats.FREE;
                         circleObjectArray.get(illuminateIndex).unSelect();
                         break;
@@ -246,14 +258,17 @@ public class Controller1 extends Application {
                             cercles.getChildren().remove(illuminateIndex);
                             circleObjectArray.remove(illuminateIndex);
                             illuminateIndex = -2;
+                            help.illuminateOptions(Help.Etats.HAND_CLOSE);
 
                         } else {
+                            help.illuminateOptions(Help.Etats.HAND_CLOSE);
 
                             basket.makeItFull();
                         }
                         etat = Etats.FREE;
                         break;
                     case MENU:
+                        help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         etat = Etats.FREE;
                         circleObjectArray.get(illuminateIndex).unSelect();
                         menu.getChildren().removeAll(menu.getChildren());
@@ -451,6 +466,7 @@ public class Controller1 extends Application {
                     etat = Etats.FREE;
                     curseur.setVisible(true);
                 } else {
+                    help.illuminateOptions();
                     curseur.setVisible(false);
                     menu.getChildren().removeAll(menu.getChildren());
                     if (illuminateIndex >= 0) {
@@ -562,12 +578,15 @@ public class Controller1 extends Application {
             if (index != illuminateIndex) {
                 for (CircleObject c : circleObjectArray) {
                     c.toNormal();
+                    help.illuminateOptions();
                 }
                 illuminateIndex = index;
                 if (illuminateIndex == -1) {
+                    help.illuminateOptions(Help.Etats.HAND_CLOSE);
                     basket.handIn();
                 } else if (illuminateIndex >= 0) {
                     basket.handOut();
+                    help.illuminateOptions(Help.Etats.HAND_CLOSE);
                     circleObjectArray.get(illuminateIndex).toIlluminate();
                 }
             }
@@ -575,6 +594,7 @@ public class Controller1 extends Application {
             if (basket.proximity(x, y)) {
                 basket.handIn();
                 illuminateIndex = -1;
+                help.illuminateOptions(Help.Etats.HAND_CLOSE);
             } else {
                 illuminateIndex = -2;
                 basket.handOut();
@@ -696,10 +716,15 @@ public class Controller1 extends Application {
 
             @Override
             public void handle(KeyEvent arg0) {
-                if (stage.isFullScreen()){
+                if (stage.isFullScreen() && arg0.getCode() == KeyCode.F){
                     stage.setFullScreen(false);
                 }else{
                     stage.setFullScreen(true);
+                }
+                if (help.isVisible() && arg0.getCode() == KeyCode.H){
+                    help.setVisible(false);
+                }else{
+                    help.setVisible(true);
                 }
                 
                 
