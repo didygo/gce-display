@@ -8,8 +8,10 @@ import fr.dgac.ivy.Ivy;
 import fr.dgac.ivy.IvyClient;
 import fr.dgac.ivy.IvyException;
 import fr.dgac.ivy.IvyMessageListener;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Timer;
 
 /**
  *
@@ -21,6 +23,8 @@ public class KinectServer1 implements KinectServer {
     private String busAdress;
     private Controller1 ctrl;
     private double windowSizeY, windowSizeX, kinectWindowSizeX, kinectWindowSizeY;
+    private Timer timer;
+    private Date dateTemp;
 
     public KinectServer1(Controller1 c, String adresse, double wX, double wY) {
         this.ctrl = c;
@@ -29,6 +33,8 @@ public class KinectServer1 implements KinectServer {
         this.windowSizeY = wY;
         this.kinectWindowSizeX = 640;
         this.kinectWindowSizeY = 480;
+        dateTemp = new Date();
+
 
 
         this.bus = new Ivy("KinectServer", "KinectServer READY", null);
@@ -42,6 +48,13 @@ public class KinectServer1 implements KinectServer {
 
 
 
+    }
+
+    public double ips() {
+        
+        double temp = (new Date().getTime() - dateTemp.getTime());
+        dateTemp = new Date();
+        return temp;
     }
 
     public void sendToSelf(boolean b) {
@@ -109,7 +122,7 @@ public class KinectServer1 implements KinectServer {
 
                 @Override
                 public void receive(IvyClient client, String[] args) {
-                    System.out.println("KINECT_2HANDS_POSITION=" + args[0]);
+                    //System.out.println("KINECT_2HANDS_POSITION=" + args[0]);
 
                     ctrl.eventKinect2Hands(Double.parseDouble(args[0]));
 
@@ -163,7 +176,7 @@ public class KinectServer1 implements KinectServer {
 
                 @Override
                 public void receive(IvyClient client, String[] args) {
-                    System.out.println("KINECT_HAND_DEPTH=" + args[0]);
+                    //System.out.println("KINECT_HAND_DEPTH=" + args[0]);
 
                     ctrl.eventHandDepth(Double.parseDouble(args[0]));
                 }
@@ -179,7 +192,7 @@ public class KinectServer1 implements KinectServer {
 
                 @Override
                 public void receive(IvyClient client, String[] args) {
-                    System.out.println("KINECT_FINGER_ANGLE=" + args[0]);
+                    //System.out.println("KINECT_FINGER_ANGLE=" + args[0]);
                     String s = "";
                     for (int i = 0; i < args[0].length(); i++) {
                         if (args[0].charAt(i) == ',') {
@@ -188,8 +201,11 @@ public class KinectServer1 implements KinectServer {
                             s = s + args[0].charAt(i);
                         }
                     }
-                    System.out.println(s);
+                    //System.out.println(s);
+
+                    
                     ctrl.eventFingerAngle(Math.toRadians(Double.parseDouble(s)));
+                   
                 }
             });
 

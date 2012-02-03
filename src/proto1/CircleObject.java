@@ -19,6 +19,7 @@ import javafx.util.Duration;
 public class CircleObject {
 
     private Circle circ;
+    private Pipe pipeSize, pipeOpacity;
     private double size = 90;
     private double boxSize = 80;
     private BoxBlur box;
@@ -32,25 +33,36 @@ public class CircleObject {
     double X = 0;
     double Y = 0;
     //variables paramétrables
-    double constantSize = 1;
-    double constantOpacity = 0.4;
+    double constantSize = 2;
+    double constantOpacity = 2;
     double maximumSize = 300;
     double minimumSize = 0;
-    double maximumOpacity = 200;
+    double maximumOpacity = 300;
     double minimumOpacity = 0;
 
     public CircleObject(double i, double j, Group g) {
-        circ = new javafx.scene.shape.Circle(0, 0, size, Color.BLACK);
-        box = new BoxBlur(boxSize, boxSize, 10);
-        circ.setEffect(box);
-        totalGroup = new Group();
-        totalGroup.getChildren().add(circ);
+        this.circ = new javafx.scene.shape.Circle(0, 0, size, Color.BLACK);
+        this.box = new BoxBlur(boxSize, boxSize, 10);
+        this.circ.setEffect(box);
+        this.totalGroup = new Group();
+        this.totalGroup.getChildren().add(circ);
+        
+        this.pipeSize = new Pipe(minimumSize, maximumSize,size,constantSize);
+        this.pipeOpacity = new Pipe(minimumOpacity, maximumOpacity,boxSize,constantOpacity);
+        
+        this.totalGroup.getChildren().add(pipeSize.getPipe());
+        this.totalGroup.getChildren().add(pipeOpacity.getPipe());
+        this.pipeOpacity.setVisible(false);
+        this.pipeSize.setVisible(false);
 
         initIllumination();
 
-        totalGroup.getChildren().add(illuminationGroup);
-        totalGroup.setLayoutX(i);
-        totalGroup.setLayoutY(j);
+        this.totalGroup.getChildren().add(illuminationGroup);
+        this.totalGroup.setLayoutX(i);
+        this.totalGroup.setLayoutY(j);
+        
+        
+        
         g.getChildren().add(totalGroup);
 
 
@@ -115,6 +127,7 @@ public class CircleObject {
         if (box.getHeight() + constantOpacity * x >= minimumOpacity && box.getHeight() + constantOpacity * x <= maximumOpacity) {
             box.setHeight(box.getHeight() + constantOpacity * x);
             box.setWidth(box.getWidth() + constantOpacity * x);
+            pipeOpacity.move(-x);
         }
 
     }
@@ -123,6 +136,7 @@ public class CircleObject {
     public void changeSize(double x) {
         if (circ.getRadius() + constantSize * x >= minimumSize && circ.getRadius() + constantSize * x <= maximumSize) {
             circ.setRadius(circ.getRadius() + constantSize * x);
+            pipeSize.move(-x);
         }
     }
 
@@ -170,7 +184,20 @@ public class CircleObject {
         totalGroup.setLayoutY(totalGroup.getLayoutY() + y);
 
     }
+    
+    public void displayPipeSize(boolean b){
+        pipeSize.setVisible(b);
+        //pipeSize.getPipe().setLayoutX(totalGroup.getLayoutX());
+        //pipeSize.getPipe().setLayoutY(totalGroup.getLayoutY());
+    }
+    
+    public void displayPipeOpacity(boolean b){
+        pipeOpacity.setVisible(b);
+        //pipeOpacity.getPipe().setLayoutX(totalGroup.getLayoutX());
+        //pipeOpacity.getPipe().setLayoutY(totalGroup.getLayoutY());
+    }
 
+    
     public void destroy() {
         transition.stop();
         toNormal();

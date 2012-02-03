@@ -76,12 +76,14 @@ public class CircleBasket {
      // le panier fermé devient fermé et vide
     public void makeItEmpty(){
         etat = Etats.CLOSE_EMPTY;
+        basketImg.setImage(new Image("Images/tiroir/tiroirVide.png"));
     }
     
     
     // le panier fermé devient fermé et contient un Sunshader
     public void makeItFull(){
         etat = Etats.CLOSE_FULL;
+        basketImg.setImage(new Image("Images/tiroir/tiroirPlein.png"));
     }
     public void handIn() {
         switch (etat) {

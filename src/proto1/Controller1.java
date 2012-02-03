@@ -61,6 +61,8 @@ public class Controller1 extends Application {
     Curseur curseur;
     //le menu d'aide
     Help help;
+    //le pipe pour le size
+    Pipe pipeSize;
 
     public enum Etats {
 
@@ -86,8 +88,8 @@ public class Controller1 extends Application {
         kinectPosYOpacity = 0;
 
         /// 1) Initialisation de la scène graphique//
-        windowSizeX = 1440;
-        windowSizeY = 900;
+        windowSizeX = 640;
+        windowSizeY = 480;
         kinectWindowSizeX = 640;
         kinectWindowSizeY = 480;
         root = new Group();
@@ -105,18 +107,40 @@ public class Controller1 extends Application {
                 System.exit(0);
             }
         });
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+            @Override
+            public void handle(KeyEvent arg0) {
+                if (arg0.getCode() == KeyCode.F) {
+                    if (stage.isFullScreen()) {
+                        stage.setFullScreen(false);
+                    } else {
+                        stage.setFullScreen(true);
+                    }
+                }
+                if (arg0.getCode() == KeyCode.H) {
+                    if (help.isVisible()) {
+                        help.setVisible(false);
+                    } else {
+                        help.setVisible(true);
+                    }
+                }
+
+
+            }
+        });
 
 
 
 
         /// 2) Initialisation du bus de communication inter logiciel ///
-        adresseBus = "192.168.1.255:2010";//"10.3.8.255:2010";
+        adresseBus = "169.254.255.255:2010";//"10.3.8.255:2010";
         kinectServer = new KinectServer1(this, adresseBus, windowSizeX, windowSizeY);
         //////////////////////////////////////////////////////////////
-        gestionEvenementsSouris(scene);
+        //gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
         etat = Etats.FREE;
-        basket = new CircleBasket(root, windowSizeX + 40, windowSizeY);
+        basket = new CircleBasket(root, windowSizeX , windowSizeY);
 
         circleObjectArray = new ArrayList();
         cercles = new Group();
@@ -136,26 +160,27 @@ public class Controller1 extends Application {
         ImageView v = new ImageView(new Image("Images/curseurs/"));
         v.setX(200);
         v.setY(200);
-        
 
 
-        help = new Help(windowSizeX,windowSizeY);
+
+        help = new Help(windowSizeX, windowSizeY);
         help.addImg("Images/help/doigtGris.png", Help.Etats.FINGER);
         help.addImg("Images/help/mainFermeeGris.png", Help.Etats.HAND_CLOSE);
         help.addImg("Images/help/mainOuverteGris.png", Help.Etats.HAND_OPEN);
-        root.getChildren().addAll(v,help.getHelp());
-        
+        root.getChildren().addAll(v, help.getHelp());
+
         //primaryStage.setFullScreen(true);
-        
-        
-        
+
+        root.getChildren().add(new Config().getConfig());
+
+
 
     }
 
     public void handSelect() {
         curseur.changeToHandClose();
         Platform.runLater(new Runnable() {
-            
+
             @Override
             public void run() {
                 switch (etat) {
@@ -204,6 +229,7 @@ public class Controller1 extends Application {
                                 distanceZkinect = kinectPosZ;
                                 limitBack = kinectPosZ + segmentSizeOpacity / 2;
                                 limitFront = kinectPosZ - segmentSizeOpacity / 2;
+                                circleObjectArray.get(illuminateIndex).displayPipeOpacity(true);
                                 etat = Etats.CHANGE_OPACITY;
                                 break;
                             case SIZE:
@@ -211,7 +237,7 @@ public class Controller1 extends Application {
                                 //valeur magique paramétrable
                                 limitLeft = kinectPosZ - segmentSizeResize / 2;
                                 limitRight = kinectPosZ + segmentSizeResize / 2;
-
+                                circleObjectArray.get(illuminateIndex).displayPipeSize(true);
                                 etat = Etats.CHANGE_SIZE;
                                 break;
                             case CANCEL:
@@ -239,11 +265,15 @@ public class Controller1 extends Application {
                         etat = Etats.FREE;
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         circleObjectArray.get(illuminateIndex).unSelect();
+                         circleObjectArray.get(illuminateIndex).displayPipeSize(false);
+                        circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
                         break;
                     case CHANGE_SIZE:
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         etat = Etats.FREE;
                         circleObjectArray.get(illuminateIndex).unSelect();
+                         circleObjectArray.get(illuminateIndex).displayPipeSize(false);
+                        circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
                         break;
 
                     case FREE:
@@ -282,7 +312,7 @@ public class Controller1 extends Application {
     }
 
     public void eventKinectMove(final double x, final double y, final double z) {
-        System.out.println(etat);
+        //System.out.println(etat);
         Platform.runLater(new Runnable() {
 
             @Override
@@ -344,9 +374,10 @@ public class Controller1 extends Application {
 
                         break;
                 }
+                curseur.setPosition(kinectPosX, kinectPosY);
             }
         });
-        curseur.setPosition(kinectPosX, kinectPosY);
+        
     }
 
     public void eventKinect2Hands(final double distance) {
@@ -464,7 +495,7 @@ public class Controller1 extends Application {
                 if (b) {
                     majFeedback(kinectPosX, kinectPosY);
                     etat = Etats.FREE;
-                    curseur.setVisible(true);
+                    curseur.changeToHandOpen();
                 } else {
                     help.illuminateOptions();
                     curseur.setVisible(false);
@@ -526,6 +557,8 @@ public class Controller1 extends Application {
                         tmenu.setIndicator(d);
                         tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
                         tmenu.setVisible(true);
+                        circleObjectArray.get(illuminateIndex).displayPipeSize(false);
+                        circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
                         etat = Etats.MENU;
                         menu.getChildren().add(tmenu.getMenu());
                         break;
@@ -536,6 +569,8 @@ public class Controller1 extends Application {
                         tmenu.setIndicator(d);
                         tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
                         tmenu.setVisible(true);
+                        circleObjectArray.get(illuminateIndex).displayPipeSize(false);
+                        circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
                         etat = Etats.MENU;
                         menu.getChildren().add(tmenu.getMenu());
                         break;
@@ -553,6 +588,7 @@ public class Controller1 extends Application {
                         tmenu.setVisible(true);
                         etat = Etats.MENU;
                         menu.getChildren().add(tmenu.getMenu());
+                        help.illuminateOptions(Help.Etats.HAND_CLOSE, Help.Etats.HAND_OPEN);
 
 
                         break;
@@ -669,12 +705,12 @@ public class Controller1 extends Application {
 
     private void gestionEvenementsSouris(Scene scene) {
         kinectServer.sendToSelf(true);
-        
+
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
-        
+
             @Override
             public void handle(MouseEvent me) {
-                
+
                 kinectServer.send("KINECT_HAND_OPENED=false");
 
 
@@ -711,25 +747,7 @@ public class Controller1 extends Application {
         });
 
 
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            
-
-            @Override
-            public void handle(KeyEvent arg0) {
-                if (stage.isFullScreen() && arg0.getCode() == KeyCode.F){
-                    stage.setFullScreen(false);
-                }else{
-                    stage.setFullScreen(true);
-                }
-                if (help.isVisible() && arg0.getCode() == KeyCode.H){
-                    help.setVisible(false);
-                }else{
-                    help.setVisible(true);
-                }
-                
-                
-            }
-        });
+        
 
 
 
