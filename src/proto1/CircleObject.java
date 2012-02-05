@@ -17,11 +17,11 @@ import javafx.util.Duration;
  * @author demalejo
  */
 public class CircleObject {
+    private ParamManager param;
 
     private Circle circ;
     private Pipe pipeSize, pipeOpacity;
-    private double size = 90;
-    private double boxSize = 80;
+    
     private BoxBlur box;
     //objets de l'illumination
     private Group illuminationGroup, totalGroup;
@@ -33,14 +33,31 @@ public class CircleObject {
     double X = 0;
     double Y = 0;
     //variables paramétrables
-    double constantSize = 2;
-    double constantOpacity = 2;
-    double maximumSize = 300;
-    double minimumSize = 0;
-    double maximumOpacity = 300;
-    double minimumOpacity = 0;
+    double constantSize;
+    double constantOpacity;
+    double maximumSize;
+    double minimumSize;
+    double maximumOpacity;
+    double minimumOpacity;
+    private double size;
+    private double boxSize;
+    int sizedirection, opacityDirection;
 
-    public CircleObject(double i, double j, Group g) {
+    public CircleObject(double i, double j, Group g, ParamManager param) {
+        //initialisation des paramètres
+        this.param = param;
+        this.size = param.defaultSize;
+        this.constantOpacity = param.constantOpacity;
+        this.constantSize = param.constantSize;
+        this.boxSize = param.defaultOpacity;
+        this.minimumOpacity = param.minimumOpacity;
+        this.minimumSize = param.minimumSize;
+        this.maximumOpacity = param.maximumOpacity;
+        this.maximumSize = param.maximumSize;
+        this.sizedirection = param.sizeDirection;
+        this.opacityDirection = param.opacityDirection;
+        
+        
         this.circ = new javafx.scene.shape.Circle(0, 0, size, Color.BLACK);
         this.box = new BoxBlur(boxSize, boxSize, 10);
         this.circ.setEffect(box);
@@ -124,11 +141,14 @@ public class CircleObject {
     }
 
     public void changeOpacity(double x) {
+        System.out.println(x);
         if (box.getHeight() + constantOpacity * x >= minimumOpacity && box.getHeight() + constantOpacity * x <= maximumOpacity) {
             box.setHeight(box.getHeight() + constantOpacity * x);
             box.setWidth(box.getWidth() + constantOpacity * x);
+            System.out.println("changement opacité");
             pipeOpacity.move(-x);
         }
+        
 
     }
     // valeur magique 2 àparamétrable

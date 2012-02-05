@@ -54,6 +54,10 @@ public class KinectServer1 implements KinectServer {
         windowSizeX = x;
         windowSizeY = y;
     }
+    
+    public void disconnect(){
+        bus.stop();
+    }
 
     public double ips() {
         
@@ -96,10 +100,10 @@ public class KinectServer1 implements KinectServer {
                 public void receive(IvyClient client, String[] args) {
                     //System.out.println("KINECT_EVENT=" + args[0]);
                     if (args[0].equals("KINECT_CONNECTED")) {
-                        ctrl.kinectconenction(true);
+                        ctrl.kinectconnection(true);
                     }
                     if (args[0].equals("KINECT_DISCONNECTED")) {
-                        ctrl.kinectconenction(false);
+                        ctrl.kinectconnection(false);
                     }
 
                     if (args[0].equals("USER_DETECTED")) {
@@ -162,7 +166,7 @@ public class KinectServer1 implements KinectServer {
 
                 @Override
                 public void receive(IvyClient client, String[] args) {
-                    //System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1]);
+                    //System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1]+ " Z=" + args[2]);
 
                     ctrl.eventKinectMove(
                             ((double) Integer.parseInt(args[0])) * windowSizeX / kinectWindowSizeX,

@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 /**
  *
@@ -16,20 +17,15 @@ import javafx.stage.Stage;
 public class Launcher extends Application {
 
     private Controller1 c1;
-    private Stage stage;
-    private double windowNormalSizeX = 800;
-    private double windowNormalSizeY = 600;
-    private double windowFullSizeX = 1440;
-    private double windowFullSizeY = 900;
+    private Stage stage1;
 
-    public void init(Stage stage) {
-        this.stage = stage;
-    }
 
-    private void stopAppli() {
+    
+
+    private void stopApplication() {
         try {
             
-            stage.close();
+            c1.getStage().close();
             c1.stop();
             
         } catch (Exception ex) {
@@ -37,23 +33,26 @@ public class Launcher extends Application {
 }
     }
 
-    private void startAppli(double x, double y, boolean full) {
-        c1 = new Controller1(x, y,this,full);
+    private void startApplication( boolean full) {
+        c1 = new Controller1(this,full);
         try {
-            c1.start(stage);
+            stage1 = new Stage(StageStyle.DECORATED);
+            
+            
+            c1.start(stage1);
         } catch (Exception ex) {
             Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     public void fullScreen(boolean b) {
-if (stage != null){
+if (c1.getStage() != null){
         if (b) {
-            stopAppli();
-            startAppli(windowFullSizeX, windowFullSizeY,b);
+            stopApplication();
+            startApplication(b);
         }else{
-            stopAppli();
-            startAppli(windowNormalSizeX, windowNormalSizeY,b);
+            stopApplication();
+            startApplication(b);
         }
 }
 
@@ -65,8 +64,7 @@ if (stage != null){
 
     @Override
     public void start(Stage arg0) throws Exception {
-        init(arg0);
-        startAppli(windowNormalSizeX, windowNormalSizeY,false);
+        startApplication(false);
         
 
     }

@@ -25,29 +25,36 @@ import javafx.stage.WindowEvent;
  *
  * @author demalejo
  */
-public class Controller1 extends Application  {
-    // Variables du système d'affichage
+public class Controller1 extends Application {
+    //le gestionnaire des paramètres
 
+    private ParamManager param;
+    // le gestionnaire du logiciel
     private Launcher launcher;
+    //variable pour définir si l'affichage est en fullscreen
     private boolean fullScreen;
+    // variables de la scène graphique
     private Stage stage;
     private Scene scene;
     private Group root, cercles, menu;
-    private ImageView background;
     private ArrayList<CircleObject> circleObjectArray;
+    private ImageView background;
+    // variables sur le dimensionnemen
     private double kinectPosX = 0;
     private double kinectPosY = 0;
     private double kinectPosZ = 0;
-    private double windowSizeX = 800;
-    private double windowSizeY = 600;
-    private double kinectWindowSizeX, kinectWindowSizeY;
+    private double windowSizeWidth = 800;
+    private double windowSizeHeight = 600;
+    private double kinectWindowSizeWidth, kinectWindowSizeHeight;
+    // bus de communication
     private String adresseBus;
     private KinectServer1 kinectServer;
     ConnectionTool connectionTool;
     ManConnectionTool manConnectionTool;
+    //panier à sunshader
     CircleBasket basket;
+    // varaible de sélection : -1 pour le panier , -2 pour rien , 0..infini pour les sunshader
     int illuminateIndex = -2;
-    // -1 pour le panier , -2 pour rien , 0..infini pour les sunshader
     //variables pour le resize 
     double limitLeft, limitRight;
     double distance2handsKinect;
@@ -59,11 +66,8 @@ public class Controller1 extends Application  {
     double opacityGuard;
     double kinectPosXOpacity, kinectPosYOpacity;
     double segmentSizeOpacity = 2;
-    //varaibles de test à enlever
-    double distSize = 100;
-    double distOpacity = 100;
-    //variablr pour demultiplier le deplacement
-    double multTranslation = 1;
+    //variable pour demultiplier le deplacement
+    double multTranslation;
     //les TiltMenu
     TiltMenu tmenu;
     //le curseur
@@ -73,13 +77,21 @@ public class Controller1 extends Application  {
     //le pipe pour le size
     Pipe pipeSize;
 
-    public Controller1(double windowsx, double windowsy, Launcher l, boolean full){
-        this.windowSizeX = windowsx;
-        this.windowSizeY = windowsy;
+    public Controller1(Launcher l, boolean fullScreen) {
+        this.param = new ParamManager();
         this.launcher = l;
-        this.fullScreen = full;
+        this.fullScreen = fullScreen;
+        if (fullScreen) {
+            this.windowSizeWidth = param.windowSizeWidthFull;
+            this.windowSizeHeight = param.windowsizeHeightFull;
+        } else {
+            this.windowSizeWidth = param.windowSizeWidth;
+            this.windowSizeHeight = param.windowsizeHeight;
+        }
+
+
+
     }
-    
 
     public enum Etats {
 
@@ -87,51 +99,43 @@ public class Controller1 extends Application  {
     }
     private Etats etat;
 
-    private void changeSizeScene(double x, double y) {
-        //root.getChildren().removeAll(root.getChildren());
-        //root.getChildren().add(background);
-        windowSizeX = x;
-        windowSizeY = y;
-
-        //scene.getWindow().setWidth(x);
-        //scene.getWindow().setHeight(y);
-        initComponents();
-
-
-    }
-    public Stage getStage(){
+    public Stage getStage() {
         return stage;
     }
 
     //////////////////////////////////////
     private void init(Stage primaryStage) {
+
         this.stage = primaryStage;
 
         /// init des variables
-        distance2handsKinect = 100;
-        limitLeft = 90;
-        limitRight = 110;
-        kinectPosXResize = 0;
-        kinectPosYResize = 0;
+        this.distance2handsKinect = 100;
+        this.limitLeft = 90;
+        this.limitRight = 110;
+        this.kinectPosXResize = 0;
+        this.kinectPosYResize = 0;
+        this.multTranslation = param.constantMultMove;
 
-        distanceZkinect = 100;
-        limitBack = 110;
-        limitFront = 90;
-        opacityGuard = 30;
-        kinectPosXOpacity = 0;
-        kinectPosYOpacity = 0;
+        // Gardes pour le resize et l'opacity
+        this.distanceZkinect = 100;
+        this.limitBack = 110;
+        this.limitFront = 90;
+        this.opacityGuard = 30;
+        this.kinectPosXOpacity = 0;
+        this.kinectPosYOpacity = 0;
 
-        /// 1) Initialisation de la scène graphique//
+        /// Initialisation de la scène graphique//
+        this.kinectWindowSizeWidth = param.kinectWindowWidth;
+        this.kinectWindowSizeHeight = param.kinectWindowHeight;
+        this.root = new Group();
+        this.scene = new Scene(root, windowSizeWidth, windowSizeHeight);
 
-        kinectWindowSizeX = 640;
-        kinectWindowSizeY = 480;
-        root = new Group();
-        scene = new Scene(root, windowSizeX, windowSizeY);
-        background = new ImageView(new Image("Images/fonds/ciel3.jpg"));
-        //primaryStage.setResizable(false);
+
+        this.background = new ImageView(new Image("Images/fonds/ciel5.jpg"));
         primaryStage.setScene(scene);
-        root.getChildren().add(background);
+        this.root.getChildren().add(background);
         ////////////////////////////////////////
+
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 
             @Override
@@ -140,6 +144,7 @@ public class Controller1 extends Application  {
                 System.exit(0);
             }
         });
+
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
             @Override
@@ -147,14 +152,13 @@ public class Controller1 extends Application  {
 
                 if (arg0.getCode() == KeyCode.F) {
                     kinectServer.send("IHM_EVENT=END_CONNECTION");
-                    
+                    kinectServer.disconnect();
                     if (getStage().isFullScreen()) {
                         launcher.fullScreen(false);
                     } else {
                         launcher.fullScreen(true);
                     }
                 }
-                
                 if (arg0.getCode() == KeyCode.H) {
                     if (help.isVisible()) {
                         help.helpVisible(false);
@@ -162,44 +166,35 @@ public class Controller1 extends Application  {
                         help.helpVisible(true);
                     }
                 }
-                
             }
         });
-        
-        
-        stage.setFullScreen(fullScreen);
-
-
+        this.stage.setFullScreen(fullScreen);
         initComponents();
-
-
-
-
-
     }
 
+    // initilaise le bus logiciel, et les composants graphiques
     public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
-        adresseBus = "169.254.255.255:2010";
-        kinectServer = new KinectServer1(this, adresseBus, windowSizeX, windowSizeY);
+        this.adresseBus = "192.168.1.255:2010";
+        this.kinectServer = new KinectServer1(this, adresseBus, windowSizeWidth, windowSizeHeight);
         //////////////////////////////////////////////////////////////
         //gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
-        etat = Etats.FREE;
-        basket = new CircleBasket(root, windowSizeX, windowSizeY);
+        this.etat = Etats.FREE;
+        this.basket = new CircleBasket(root, windowSizeWidth, windowSizeHeight, param);
 
-        circleObjectArray = new ArrayList();
-        cercles = new Group();
-        menu = new Group();
-        root.getChildren().addAll(cercles, menu);
+        this.circleObjectArray = new ArrayList();
+        this.cercles = new Group();
+        this.menu = new Group();
+        this.root.getChildren().addAll(cercles, menu);
         ////////////////////////////////////////////////////////
-        
-        connectionTool = new ConnectionTool(root, windowSizeX - 50, windowSizeY - 50, kinectServer);
-        manConnectionTool = new ManConnectionTool(root, windowSizeX - 150, windowSizeY - 50, kinectServer);
+
+        this.connectionTool = new ConnectionTool(root, windowSizeWidth - 50, windowSizeHeight - 50, kinectServer);
+        this.manConnectionTool = new ManConnectionTool(root, windowSizeWidth - 150, windowSizeHeight - 50, kinectServer);
 
 
-        curseur = new Curseur(root);
-        curseur.changeToLibre();
+        this.curseur = new Curseur(root);
+        this.curseur.changeToLibre();
 
 
 
@@ -209,7 +204,7 @@ public class Controller1 extends Application  {
 
 
 
-        help = new Help(windowSizeX, windowSizeY);
+        help = new Help(windowSizeWidth, windowSizeHeight);
         help.addImg("Images/help/doigtGris.png", Help.Etats.FINGER);
         help.addImg("Images/help/mainFermeeGris.png", Help.Etats.HAND_CLOSE);
         help.addImg("Images/help/mainOuverteGris.png", Help.Etats.HAND_OPEN);
@@ -249,7 +244,7 @@ public class Controller1 extends Application  {
                             help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
 
                         } else if (illuminateIndex == -1) {
-                            circleObjectArray.add(new CircleObject(kinectPosX, kinectPosY, cercles));
+                            circleObjectArray.add(new CircleObject(kinectPosX, kinectPosY, cercles, param));
                             //attention au changment de coordonnée
 
                             illuminateIndex = circleObjectArray.size() - 1;
@@ -268,7 +263,9 @@ public class Controller1 extends Application  {
                         break;
                     case MENU:
                         help.illuminateOptions(Help.Etats.FINGER, Help.Etats.HAND_OPEN);
+                        System.out.println(tmenu.selected());
                         switch (tmenu.selected()) {
+                            
                             case OPACITY:
                                 distanceZkinect = kinectPosZ;
                                 limitBack = kinectPosZ + segmentSizeOpacity / 2;
@@ -585,13 +582,19 @@ public class Controller1 extends Application  {
         });
     }
 
-    void kinectconenction(boolean b) {
-        help.handWaveSetVisible(b);
-        if (b) {
-            connectionTool.connected();
-        } else {
-            connectionTool.disconnected();
-        }
+    void kinectconnection(final boolean b) {
+        Platform.runLater(new Runnable() {
+
+            @Override
+            public void run() {
+                help.handWaveSetVisible(b);
+                if (b) {
+                    connectionTool.connected();
+                } else {
+                    connectionTool.disconnected();
+                }
+            }
+        });
     }
 
     public void eventFingerAngle(final double d) {
@@ -786,7 +789,7 @@ public class Controller1 extends Application  {
                 // System.out.println("KINECT_POSITION SEND X=" + (int) (me.getX()*kinectWindowSizeX/windowSizeX) + " Y=" + (int) (me.getY()*kinectWindowSizeY/windowSizeY ));
 
 
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeX / windowSizeX) + " Y=" + (int) (me.getY() * kinectWindowSizeY / windowSizeY) + " Z=0");
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z=0");
             }
         });
 
@@ -804,7 +807,7 @@ public class Controller1 extends Application  {
             @Override
             public void handle(MouseEvent me) {
 
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeX / windowSizeX) + " Y=" + (int) (me.getY() * kinectWindowSizeY / windowSizeY) + " Z=0");
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z=0");
             }
         });
 
@@ -823,9 +826,6 @@ public class Controller1 extends Application  {
         stage = primaryStage;
         init(primaryStage);
         primaryStage.show();
-        
-    }
 
-    
-   
+    }
 }

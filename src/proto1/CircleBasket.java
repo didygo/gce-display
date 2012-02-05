@@ -19,10 +19,11 @@ import javafx.util.Duration;
  */
 public class CircleBasket {
 
-    ImageView basketImg;
-    PathTransition transition;
-    Path pathReturn;
-    Path pathGo;
+    private ParamManager param;
+    private ImageView basketImg;
+    private PathTransition transition;
+    private Path pathReturn;
+    private Path pathGo;
     
     //variables de position
     private double basketX,basketY;
@@ -34,7 +35,8 @@ public class CircleBasket {
     }
     private Etats etat = Etats.CLOSE_FULL;
 
-    public CircleBasket(Group g, double x, double y) {
+    public CircleBasket(Group g, double x, double y, ParamManager param) {
+        this.param = param;
         basketX = 100;
         basketY = 200;
         basketImg = new ImageView(new Image("Images/tiroir/tiroirPlein.png"));
@@ -62,6 +64,22 @@ public class CircleBasket {
         
         g.getChildren().addAll(basketImg, pathGo, pathReturn);
         closeWithSun();
+    }
+    
+    public void setPosition(double x, double y){
+        transition.stop();
+
+        basketImg.setX(x);
+        pathGo.getElements().removeAll(pathGo.getElements());
+        pathReturn.getElements().removeAll(pathReturn.getElements());
+        
+        pathGo.getElements().add(new MoveTo(x, basketY));
+        pathGo.getElements().add(new LineTo(x - basketX, basketY));
+        //pathGo.setVisible(false);
+        
+        pathReturn.getElements().add(new MoveTo(x - basketX, basketY));
+        pathReturn.getElements().add(new LineTo(x, basketY));
+        //pathReturn.setVisible(false);
     }
     
     
