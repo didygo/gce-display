@@ -63,6 +63,8 @@ public class CircleBasket {
         g.getChildren().addAll(basketImg, pathGo, pathReturn);
         closeWithSun();
     }
+    
+    
     // je metz un sushader dans le panier ouvert
     public void sunDroped(){
         basketImg.setImage(new Image("Images/tiroir/tiroirPlein.png"));

@@ -49,6 +49,11 @@ public class KinectServer1 implements KinectServer {
 
 
     }
+    
+    public void changeWindowSize(double x, double y){
+        windowSizeX = x;
+        windowSizeY = y;
+    }
 
     public double ips() {
         
@@ -91,19 +96,17 @@ public class KinectServer1 implements KinectServer {
                 public void receive(IvyClient client, String[] args) {
                     //System.out.println("KINECT_EVENT=" + args[0]);
                     if (args[0].equals("KINECT_CONNECTED")) {
-                        ctrl.connectionTool.connected();
+                        ctrl.kinectconenction(true);
                     }
                     if (args[0].equals("KINECT_DISCONNECTED")) {
-                        ctrl.connectionTool.disconnected();
+                        ctrl.kinectconenction(false);
                     }
 
                     if (args[0].equals("USER_DETECTED")) {
                         ctrl.userDetection(true);
-                        ctrl.manConnectionTool.connected();
                     }
                     if (args[0].equals("USER_LOST")) {
                         ctrl.userDetection(false);
-                        ctrl.manConnectionTool.disconnected();
                     }
                     if (args[0].equals("PUSH")) {
                         ctrl.pushHand();

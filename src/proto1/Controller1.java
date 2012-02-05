@@ -4,7 +4,10 @@
  */
 package proto1;
 
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -22,16 +25,22 @@ import javafx.stage.WindowEvent;
  *
  * @author demalejo
  */
-public class Controller1 extends Application {
+public class Controller1 extends Application  {
     // Variables du système d'affichage
 
-    Stage stage;
-    Group root, cercles, menu;
-    ArrayList<CircleObject> circleObjectArray;
+    private Launcher launcher;
+    private boolean fullScreen;
+    private Stage stage;
+    private Scene scene;
+    private Group root, cercles, menu;
+    private ImageView background;
+    private ArrayList<CircleObject> circleObjectArray;
     private double kinectPosX = 0;
     private double kinectPosY = 0;
     private double kinectPosZ = 0;
-    private double windowSizeY, windowSizeX, kinectWindowSizeX, kinectWindowSizeY;
+    private double windowSizeX = 800;
+    private double windowSizeY = 600;
+    private double kinectWindowSizeX, kinectWindowSizeY;
     private String adresseBus;
     private KinectServer1 kinectServer;
     ConnectionTool connectionTool;
@@ -64,14 +73,39 @@ public class Controller1 extends Application {
     //le pipe pour le size
     Pipe pipeSize;
 
+    public Controller1(double windowsx, double windowsy, Launcher l, boolean full){
+        this.windowSizeX = windowsx;
+        this.windowSizeY = windowsy;
+        this.launcher = l;
+        this.fullScreen = full;
+    }
+    
+
     public enum Etats {
 
         FREE, SUN_SELECTED, CHANGE_SIZE, CHANGE_OPACITY, SUPER_FREE, MENU
     }
     private Etats etat;
 
+    private void changeSizeScene(double x, double y) {
+        //root.getChildren().removeAll(root.getChildren());
+        //root.getChildren().add(background);
+        windowSizeX = x;
+        windowSizeY = y;
+
+        //scene.getWindow().setWidth(x);
+        //scene.getWindow().setHeight(y);
+        initComponents();
+
+
+    }
+    public Stage getStage(){
+        return stage;
+    }
+
     //////////////////////////////////////
     private void init(Stage primaryStage) {
+        this.stage = primaryStage;
 
         /// init des variables
         distance2handsKinect = 100;
@@ -88,13 +122,12 @@ public class Controller1 extends Application {
         kinectPosYOpacity = 0;
 
         /// 1) Initialisation de la scène graphique//
-        windowSizeX = 640;
-        windowSizeY = 480;
+
         kinectWindowSizeX = 640;
         kinectWindowSizeY = 480;
         root = new Group();
-        Scene scene = new Scene(root, windowSizeX, windowSizeY);
-        ImageView background = new ImageView(new Image("Images/fonds/ciel3.jpg"));
+        scene = new Scene(root, windowSizeX, windowSizeY);
+        background = new ImageView(new Image("Images/fonds/ciel3.jpg"));
         //primaryStage.setResizable(false);
         primaryStage.setScene(scene);
         root.getChildren().add(background);
@@ -110,44 +143,57 @@ public class Controller1 extends Application {
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
             @Override
-            public void handle(KeyEvent arg0) {
+            public void handle(final KeyEvent arg0) {
+
                 if (arg0.getCode() == KeyCode.F) {
-                    if (stage.isFullScreen()) {
-                        stage.setFullScreen(false);
+                    kinectServer.send("IHM_EVENT=END_CONNECTION");
+                    
+                    if (getStage().isFullScreen()) {
+                        launcher.fullScreen(false);
                     } else {
-                        stage.setFullScreen(true);
+                        launcher.fullScreen(true);
                     }
                 }
+                
                 if (arg0.getCode() == KeyCode.H) {
                     if (help.isVisible()) {
-                        help.setVisible(false);
+                        help.helpVisible(false);
                     } else {
-                        help.setVisible(true);
+                        help.helpVisible(true);
                     }
                 }
-
-
+                
             }
         });
+        
+        
+        stage.setFullScreen(fullScreen);
+
+
+        initComponents();
 
 
 
 
+
+    }
+
+    public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
-        adresseBus = "169.254.255.255:2010";//"10.3.8.255:2010";
+        adresseBus = "169.254.255.255:2010";
         kinectServer = new KinectServer1(this, adresseBus, windowSizeX, windowSizeY);
         //////////////////////////////////////////////////////////////
         //gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
         etat = Etats.FREE;
-        basket = new CircleBasket(root, windowSizeX , windowSizeY);
+        basket = new CircleBasket(root, windowSizeX, windowSizeY);
 
         circleObjectArray = new ArrayList();
         cercles = new Group();
         menu = new Group();
         root.getChildren().addAll(cercles, menu);
         ////////////////////////////////////////////////////////
-
+        
         connectionTool = new ConnectionTool(root, windowSizeX - 50, windowSizeY - 50, kinectServer);
         manConnectionTool = new ManConnectionTool(root, windowSizeX - 150, windowSizeY - 50, kinectServer);
 
@@ -167,14 +213,12 @@ public class Controller1 extends Application {
         help.addImg("Images/help/doigtGris.png", Help.Etats.FINGER);
         help.addImg("Images/help/mainFermeeGris.png", Help.Etats.HAND_CLOSE);
         help.addImg("Images/help/mainOuverteGris.png", Help.Etats.HAND_OPEN);
+
         root.getChildren().addAll(v, help.getHelp());
 
         //primaryStage.setFullScreen(true);
 
         root.getChildren().add(new Config().getConfig());
-
-
-
     }
 
     public void handSelect() {
@@ -265,14 +309,14 @@ public class Controller1 extends Application {
                         etat = Etats.FREE;
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         circleObjectArray.get(illuminateIndex).unSelect();
-                         circleObjectArray.get(illuminateIndex).displayPipeSize(false);
+                        circleObjectArray.get(illuminateIndex).displayPipeSize(false);
                         circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
                         break;
                     case CHANGE_SIZE:
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         etat = Etats.FREE;
                         circleObjectArray.get(illuminateIndex).unSelect();
-                         circleObjectArray.get(illuminateIndex).displayPipeSize(false);
+                        circleObjectArray.get(illuminateIndex).displayPipeSize(false);
                         circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
                         break;
 
@@ -377,7 +421,7 @@ public class Controller1 extends Application {
                 curseur.setPosition(kinectPosX, kinectPosY);
             }
         });
-        
+
     }
 
     public void eventKinect2Hands(final double distance) {
@@ -492,11 +536,17 @@ public class Controller1 extends Application {
 
             @Override
             public void run() {
+                help.handWaveSetVisible(!b);
                 if (b) {
+                    manConnectionTool.connected();
+                    help.handWaveSetVisible(false);
                     majFeedback(kinectPosX, kinectPosY);
                     etat = Etats.FREE;
                     curseur.changeToHandOpen();
+
                 } else {
+                    manConnectionTool.disconnected();
+                    help.handWaveSetVisible(true);
                     help.illuminateOptions();
                     curseur.setVisible(false);
                     menu.getChildren().removeAll(menu.getChildren());
@@ -533,6 +583,15 @@ public class Controller1 extends Application {
                 }
             }
         });
+    }
+
+    void kinectconenction(boolean b) {
+        help.handWaveSetVisible(b);
+        if (b) {
+            connectionTool.connected();
+        } else {
+            connectionTool.disconnected();
+        }
     }
 
     public void eventFingerAngle(final double d) {
@@ -624,6 +683,9 @@ public class Controller1 extends Application {
                     basket.handOut();
                     help.illuminateOptions(Help.Etats.HAND_CLOSE);
                     circleObjectArray.get(illuminateIndex).toIlluminate();
+                } else if (illuminateIndex == -2) {
+                    basket.handOut();
+                    help.illuminateOptions();
                 }
             }
         } else {
@@ -747,7 +809,7 @@ public class Controller1 extends Application {
         });
 
 
-        
+
 
 
 
@@ -761,9 +823,9 @@ public class Controller1 extends Application {
         stage = primaryStage;
         init(primaryStage);
         primaryStage.show();
+        
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+    
+   
 }
