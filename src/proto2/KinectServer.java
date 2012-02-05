@@ -10,26 +10,26 @@ import fr.dgac.ivy.IvyException;
 import fr.dgac.ivy.IvyMessageListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import proto1.KinectServer;
+
 
 /**
  *
  * @author demalejo
  */
-public class KinectServer2 implements KinectServer {
+public class KinectServer  {
 
     private Ivy bus;
     private String busAdress;
     private Controller2 ctrl;
 
-    public KinectServer2(Controller2 c, String adresse) {
+    public KinectServer(Controller2 c, String adresse) {
         this.ctrl = c;
         this.busAdress = adresse;
         this.bus = new Ivy("KinectReceiver", "KinectReceiver READY", null);
         try {
             this.bus.start(busAdress);
         } catch (IvyException ex) {
-            Logger.getLogger(KinectServer2.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KinectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         input();
         
@@ -47,16 +47,16 @@ public class KinectServer2 implements KinectServer {
             bus.start(busAdress);
             input();
         } catch (IvyException ex) {
-            Logger.getLogger(KinectServer2.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KinectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    @Override
+
      public void send(String st) {
         try {
             bus.sendMsg(st);
         } catch (IvyException ex) {
-            Logger.getLogger(KinectServer2.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KinectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -82,7 +82,7 @@ public class KinectServer2 implements KinectServer {
             
             
         } catch (IvyException ex) {
-            Logger.getLogger(KinectServer2.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KinectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         try {
@@ -99,7 +99,7 @@ public class KinectServer2 implements KinectServer {
                 }
             });          
         } catch (IvyException ex) {
-            Logger.getLogger(KinectServer2.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KinectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         try {
@@ -129,7 +129,7 @@ public class KinectServer2 implements KinectServer {
             
             
         } catch (IvyException ex) {
-            Logger.getLogger(KinectServer2.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KinectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         

@@ -16,7 +16,7 @@ import javafx.stage.StageStyle;
  */
 public class Launcher extends Application {
 
-    private Controller1 c1;
+    private Controller c1;
     private Stage stage1;
 
 
@@ -34,7 +34,7 @@ public class Launcher extends Application {
     }
 
     private void startApplication( boolean full) {
-        c1 = new Controller1(this,full);
+        c1 = new Controller(this,full);
         try {
             stage1 = new Stage(StageStyle.DECORATED);
             

@@ -16,8 +16,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import proto1.ConnectionTool;
-import proto1.ManConnectionTool;
+
 
 /**
  *
@@ -33,7 +32,7 @@ public class Controller2 extends Application {
     private Curseur cur;
     private double windowSizeY, windowSizeX;
     private String adresseBus;
-    KinectServer2 kinectServer;
+    KinectServer kinectServer;
     ConnectionTool connectionTool;
     ManConnectionTool manConnectionTool;
 
@@ -90,7 +89,7 @@ public class Controller2 extends Application {
 
     private void activerKinectProto2() {
         activateKinectCursor(); // à faire avant l'activation du receiver
-        kinectServer = new KinectServer2(this, adresseBus);
+        kinectServer = new KinectServer(this, adresseBus);
         //gestionEvenementsSouris();
     }
 

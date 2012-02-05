@@ -4,10 +4,7 @@
  */
 package proto1;
 
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -25,7 +22,7 @@ import javafx.stage.WindowEvent;
  *
  * @author demalejo
  */
-public class Controller1 extends Application {
+public class Controller extends Application {
     //le gestionnaire des paramètres
 
     private ParamManager param;
@@ -48,7 +45,7 @@ public class Controller1 extends Application {
     private double kinectWindowSizeWidth, kinectWindowSizeHeight;
     // bus de communication
     private String adresseBus;
-    private KinectServer1 kinectServer;
+    private KinectServer kinectServer;
     ConnectionTool connectionTool;
     ManConnectionTool manConnectionTool;
     //panier à sunshader
@@ -77,7 +74,7 @@ public class Controller1 extends Application {
     //le pipe pour le size
     Pipe pipeSize;
 
-    public Controller1(Launcher l, boolean fullScreen) {
+    public Controller(Launcher l, boolean fullScreen) {
         this.param = new ParamManager();
         this.launcher = l;
         this.fullScreen = fullScreen;
@@ -93,11 +90,17 @@ public class Controller1 extends Application {
 
     }
 
-    public enum Etats {
+    public enum States {
 
         FREE, SUN_SELECTED, CHANGE_SIZE, CHANGE_OPACITY, SUPER_FREE, MENU
     }
-    private Etats etat;
+    private States state;
+    
+    public enum HandState{
+        CLOSE, OPEN, FINGER
+    }
+    
+    private HandState handState;
 
     public Stage getStage() {
         return stage;
@@ -176,11 +179,11 @@ public class Controller1 extends Application {
     public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
         this.adresseBus = "127.255.255.255:2010";
-        this.kinectServer = new KinectServer1(this, adresseBus, windowSizeWidth, windowSizeHeight);
+        this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight);
         //////////////////////////////////////////////////////////////
         //gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
-        this.etat = Etats.FREE;
+        this.state = States.FREE;
         this.basket = new CircleBasket(root, windowSizeWidth, windowSizeHeight, param);
 
         this.circleObjectArray = new ArrayList();
@@ -194,7 +197,7 @@ public class Controller1 extends Application {
 
 
         this.curseur = new Curseur(root);
-        this.curseur.changeToLibre();
+        handToOpen();
 
 
 
@@ -216,17 +219,18 @@ public class Controller1 extends Application {
         root.getChildren().add(new Config().getConfig());
     }
 
-    public void handSelect() {
-        curseur.changeToHandClose();
+    public void handClosed() {
+
         Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
-                switch (etat) {
+                switch (state) {
                     case SUPER_FREE:
 
                         break;
                     case CHANGE_OPACITY:
+                        
                         //interdit
                         break;
                     case CHANGE_SIZE:
@@ -234,13 +238,22 @@ public class Controller1 extends Application {
                         break;
 
                     case FREE:
+                        switch(handState){
+                            case CLOSE:
+                                break;
+                            case FINGER:
+                                break;
+                            case OPEN:
+                                break;
+                        }
+                        
                         help.illuminateOptions();
 
                         if (illuminateIndex >= 0 && circleObjectArray.size() > 0) {
 
                             circleObjectArray.get(illuminateIndex).select();
                             basket.makeItEmpty();
-                            etat = Etats.SUN_SELECTED;
+                            state = States.SUN_SELECTED;
                             help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
 
                         } else if (illuminateIndex == -1) {
@@ -251,7 +264,7 @@ public class Controller1 extends Application {
                             circleObjectArray.get(illuminateIndex).toIlluminate();
                             circleObjectArray.get(illuminateIndex).select();
                             basket.sunCaught();
-                            etat = Etats.SUN_SELECTED;
+                            state = States.SUN_SELECTED;
                             help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
 
                         }
@@ -270,7 +283,7 @@ public class Controller1 extends Application {
                                 limitBack = kinectPosZ + segmentSizeOpacity / 2;
                                 limitFront = kinectPosZ - segmentSizeOpacity / 2;
                                 circleObjectArray.get(illuminateIndex).displayPipeOpacity(true);
-                                etat = Etats.CHANGE_OPACITY;
+                                state = States.CHANGE_OPACITY;
                                 break;
                             case SIZE:
                                 distance2handsKinect = kinectPosZ;
@@ -278,10 +291,10 @@ public class Controller1 extends Application {
                                 limitLeft = kinectPosZ - segmentSizeResize / 2;
                                 limitRight = kinectPosZ + segmentSizeResize / 2;
                                 circleObjectArray.get(illuminateIndex).displayPipeSize(true);
-                                etat = Etats.CHANGE_SIZE;
+                                state = States.CHANGE_SIZE;
                                 break;
                             case CANCEL:
-                                etat = Etats.SUN_SELECTED;
+                                state = States.SUN_SELECTED;
                                 break;
                         }
                         menu.getChildren().removeAll(menu.getChildren());
@@ -291,18 +304,18 @@ public class Controller1 extends Application {
         });
     }
 
-    public void handUnSelect() {
+    public void handOpened() {
         curseur.changeToHandOpen();
         Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
-                switch (etat) {
+                switch (state) {
                     case SUPER_FREE:
 
                         break;
                     case CHANGE_OPACITY:
-                        etat = Etats.FREE;
+                        state = States.FREE;
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         circleObjectArray.get(illuminateIndex).unSelect();
                         circleObjectArray.get(illuminateIndex).displayPipeSize(false);
@@ -310,7 +323,7 @@ public class Controller1 extends Application {
                         break;
                     case CHANGE_SIZE:
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
-                        etat = Etats.FREE;
+                        state = States.FREE;
                         circleObjectArray.get(illuminateIndex).unSelect();
                         circleObjectArray.get(illuminateIndex).displayPipeSize(false);
                         circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
@@ -335,11 +348,11 @@ public class Controller1 extends Application {
 
                             basket.makeItFull();
                         }
-                        etat = Etats.FREE;
+                        state = States.FREE;
                         break;
                     case MENU:
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
-                        etat = Etats.FREE;
+                        state = States.FREE;
                         circleObjectArray.get(illuminateIndex).unSelect();
                         menu.getChildren().removeAll(menu.getChildren());
                         break;
@@ -351,14 +364,14 @@ public class Controller1 extends Application {
 
     }
 
-    public void eventKinectMove(final double x, final double y, final double z) {
+    public void handMove(final double x, final double y, final double z) {
         //System.out.println(etat);
         Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
 
-                switch (etat) {
+                switch (state) {
                     case SUPER_FREE:
 
                         break;
@@ -420,12 +433,12 @@ public class Controller1 extends Application {
 
     }
 
-    public void eventKinect2Hands(final double distance) {
+    public void twoHandsdistance(final double distance) {
         Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
-                switch (etat) {
+                switch (state) {
                     case SUPER_FREE:
 
                         break;
@@ -446,7 +459,7 @@ public class Controller1 extends Application {
                         //valeur magique paramétrable
                         limitLeft = distance - segmentSizeResize / 2;
                         limitRight = distance + segmentSizeResize / 2;
-                        etat = Etats.CHANGE_SIZE;
+                        state = States.CHANGE_SIZE;
                         // Go etat CHANGE_SIZE
                         break;
                 }
@@ -454,47 +467,16 @@ public class Controller1 extends Application {
         });
     }
 
-    public void eventHandDepth(final double depth) {
-        Platform.runLater(new Runnable() {
-
-            @Override
-            public void run() {
-                switch (etat) {
-                    case SUPER_FREE:
-
-                        break;
-                    case CHANGE_OPACITY:
-                        majOpacity(depth);
-
-                        break;
-                    case CHANGE_SIZE:
-                        // Interdit
-                        break;
-
-                    case FREE:
-                        // Interdit
-                        break;
-
-                    case SUN_SELECTED:
-
-                        distanceZkinect = depth;
-                        limitBack = depth + segmentSizeOpacity / 2;
-                        limitFront = depth - segmentSizeOpacity / 2;
-                        etat = Etats.CHANGE_OPACITY;
-                        break;
-                }
-            }
-        });
-    }
+    
 
     public void pushHand() {
         Platform.runLater(new Runnable() {
 
             @Override
             public void run() {
-                switch (etat) {
+                switch (state) {
                     case SUPER_FREE:
-                        etat = Etats.FREE;
+                        state = States.FREE;
                         basket.show();
 
                         break;
@@ -507,7 +489,7 @@ public class Controller1 extends Application {
                         break;
 
                     case FREE:
-                        etat = Etats.SUPER_FREE;
+                        state = States.SUPER_FREE;
                         basket.hide();
                         if (illuminateIndex >= 0) {
                             circleObjectArray.get(illuminateIndex).toNormal();
@@ -537,7 +519,7 @@ public class Controller1 extends Application {
                     manConnectionTool.connected();
                     help.handWaveSetVisible(false);
                     majFeedback(kinectPosX, kinectPosY);
-                    etat = Etats.FREE;
+                    state = States.FREE;
                     curseur.changeToHandOpen();
 
                 } else {
@@ -550,9 +532,9 @@ public class Controller1 extends Application {
                         circleObjectArray.get(illuminateIndex).toNormal();
                     }
                     illuminateIndex = -2;
-                    etat = Etats.SUPER_FREE;
+                    state = States.SUPER_FREE;
                 }
-                switch (etat) {
+                switch (state) {
 
                     case SUPER_FREE:
 
@@ -596,7 +578,7 @@ public class Controller1 extends Application {
         });
     }
 
-    public void eventFingerAngle(final double d) {
+    public void fingerAngle(final double d) {
 
         curseur.changeToFingerOn();
 
@@ -605,7 +587,7 @@ public class Controller1 extends Application {
             @Override
             public void run() {
 
-                switch (etat) {
+                switch (state) {
                     case SUPER_FREE:
 
 
@@ -620,7 +602,7 @@ public class Controller1 extends Application {
                         tmenu.setVisible(true);
                         circleObjectArray.get(illuminateIndex).displayPipeSize(false);
                         circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
-                        etat = Etats.MENU;
+                        state = States.MENU;
                         menu.getChildren().add(tmenu.getMenu());
                         break;
                     case CHANGE_SIZE:
@@ -632,7 +614,7 @@ public class Controller1 extends Application {
                         tmenu.setVisible(true);
                         circleObjectArray.get(illuminateIndex).displayPipeSize(false);
                         circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
-                        etat = Etats.MENU;
+                        state = States.MENU;
                         menu.getChildren().add(tmenu.getMenu());
                         break;
 
@@ -647,7 +629,7 @@ public class Controller1 extends Application {
                         tmenu.setIndicator(d);
                         tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(), cercles.getChildren().get(illuminateIndex).getLayoutY());
                         tmenu.setVisible(true);
-                        etat = Etats.MENU;
+                        state = States.MENU;
                         menu.getChildren().add(tmenu.getMenu());
                         help.illuminateOptions(Help.Etats.HAND_CLOSE, Help.Etats.HAND_OPEN);
 
@@ -664,7 +646,25 @@ public class Controller1 extends Application {
         });
 
     }
+    
+    
+    private void handToOpen(){
+        handState = HandState.OPEN;
+        curseur.changeToHandOpen();
+    }
+    
+    private void handToClose(){
+        handState = HandState.CLOSE;
+        curseur.changeToHandClose();
+    }
 
+    private void handToFinger(){
+        handState = HandState.FINGER;
+        curseur.changeToFingerOn();
+    }
+    
+    // TODO faire les méthodes de tranistion
+    
     private void translateSunShader(double x, double y) {
         circleObjectArray.get(illuminateIndex).translatePostion(multTranslation * x, multTranslation * y);
     }
