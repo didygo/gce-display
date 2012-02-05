@@ -131,7 +131,7 @@ public class Controller1 extends Application {
         this.scene = new Scene(root, windowSizeWidth, windowSizeHeight);
 
 
-        this.background = new ImageView(new Image("Images/fonds/ciel5.jpg"));
+        this.background = new ImageView(new Image("Images/fonds/ciel4.jpg"));
         primaryStage.setScene(scene);
         this.root.getChildren().add(background);
         ////////////////////////////////////////
@@ -175,7 +175,7 @@ public class Controller1 extends Application {
     // initilaise le bus logiciel, et les composants graphiques
     public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
-        this.adresseBus = "192.168.1.255:2010";
+        this.adresseBus = "127.255.255.255:2010";
         this.kinectServer = new KinectServer1(this, adresseBus, windowSizeWidth, windowSizeHeight);
         //////////////////////////////////////////////////////////////
         //gestionEvenementsSouris(scene);
