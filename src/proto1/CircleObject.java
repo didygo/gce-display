@@ -141,11 +141,9 @@ public class CircleObject {
     }
 
     public void changeOpacity(double x) {
-        System.out.println(x);
         if (box.getHeight() + constantOpacity * x >= minimumOpacity && box.getHeight() + constantOpacity * x <= maximumOpacity) {
             box.setHeight(box.getHeight() + constantOpacity * x);
             box.setWidth(box.getWidth() + constantOpacity * x);
-            System.out.println("changement opacité");
             pipeOpacity.move(-x);
         }
         

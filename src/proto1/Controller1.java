@@ -263,7 +263,6 @@ public class Controller1 extends Application {
                         break;
                     case MENU:
                         help.illuminateOptions(Help.Etats.FINGER, Help.Etats.HAND_OPEN);
-                        System.out.println(tmenu.selected());
                         switch (tmenu.selected()) {
                             
                             case OPACITY:
