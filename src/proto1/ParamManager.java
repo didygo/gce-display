@@ -17,8 +17,8 @@ public class ParamManager {
     //taille de la fenêtre en normal et plein écran
     double windowSizeWidth = 800;
     double windowsizeHeight = 600;
-    double windowSizeWidthFull = 1920;
-    double windowsizeHeightFull = 1080;
+    double windowSizeWidthFull = 1440;
+    double windowsizeHeightFull = 900;
     
     // vitesse d'opacification et de resize
     double constantOpacity = 2;

@@ -107,10 +107,10 @@ public class KinectServer  {
                     }
 
                     if (args[0].equals("USER_DETECTED")) {
-                        ctrl.userDetection(true);
+                        ctrl.userDetected();
                     }
                     if (args[0].equals("USER_LOST")) {
-                        ctrl.userDetection(false);
+                        ctrl.userLost();
                     }
                     if (args[0].equals("PUSH")) {
                         ctrl.pushHand();
@@ -131,7 +131,7 @@ public class KinectServer  {
                 public void receive(IvyClient client, String[] args) {
                     //System.out.println("KINECT_2HANDS_POSITION=" + args[0]);
 
-                    ctrl.twoHandsdistance(Double.parseDouble(args[0]));
+                    
 
                 }
             });
