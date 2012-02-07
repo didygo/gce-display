@@ -4,6 +4,7 @@
  */
 package proto1;
 
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -17,6 +18,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.swing.Timer;
 
 /**
  *
@@ -36,7 +38,7 @@ public class Controller extends Application {
     private Group root, cercles, menu;
     private ArrayList<CircleObject> circleObjectArray;
     private ImageView background;
-    // variables sur le dimensionnemen
+    // variables sur le dimensionnement
     private double kinectPosX = 0;
     private double kinectPosY = 0;
     private double kinectPosZ = 0;
@@ -50,6 +52,10 @@ public class Controller extends Application {
     ManConnectionTool manConnectionTool;
     //panier à sunshader
     CircleBasket basket;
+    private boolean isOnBasket = false;
+    // panier qui détruit le sunshader`
+    private Destructor destructor;
+    private boolean isOnDestructor = false;
     // varaible de sélection : -1 pour le panier , -2 pour rien , 0..infini pour les sunshader
     int illuminateIndex = -2;
     //variables pour le resize 
@@ -73,6 +79,7 @@ public class Controller extends Application {
     Help help;
     //le pipe pour le size
     Pipe pipeSize;
+    Timer timer;
 
     public Controller(Launcher l, boolean fullScreen) {
         this.param = new ParamManager();
@@ -80,13 +87,13 @@ public class Controller extends Application {
         this.fullScreen = fullScreen;
         if (fullScreen) {
             this.windowSizeWidth = param.windowSizeWidthFull;
-            this.windowSizeHeight = param.windowsizeHeightFull;
+            this.windowSizeHeight = param.windowSizeHeightFull;
         } else {
             this.windowSizeWidth = param.windowSizeWidth;
-            this.windowSizeHeight = param.windowsizeHeight;
+            this.windowSizeHeight = param.windowSizeHeight;
         }
 
-
+        
 
     }
 
@@ -134,7 +141,7 @@ public class Controller extends Application {
         this.scene = new Scene(root, windowSizeWidth, windowSizeHeight);
 
 
-        this.background = new ImageView(new Image("Images/fonds/ciel4.jpg"));
+        this.background = new ImageView(new Image("Images/fonds/ciel3.jpg"));
         primaryStage.setScene(scene);
         this.root.getChildren().add(background);
         ////////////////////////////////////////
@@ -171,6 +178,16 @@ public class Controller extends Application {
                 }
             }
         });
+        timer = new Timer(1000, new ActionListener() {
+
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                tickTimer();
+            }
+        });
+        
+        
+        
         this.stage.setFullScreen(fullScreen);
         initComponents();
     }
@@ -178,12 +195,12 @@ public class Controller extends Application {
     // initilaise le bus logiciel, et les composants graphiques
     public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
-        this.adresseBus = "127.255.255.255:2010";
-        this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight);
+        this.adresseBus = "169.254.255.255:2010";
+        this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight,param);
         //////////////////////////////////////////////////////////////
         //gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
-        this.state = States.FREE;
+        this.state = States.SUPER_FREE;
         this.basket = new CircleBasket(root, windowSizeWidth, windowSizeHeight, param);
 
         this.circleObjectArray = new ArrayList();
@@ -197,13 +214,19 @@ public class Controller extends Application {
 
 
         this.curseur = new Curseur(root);
-        handToOpen();
+        this.curseur.setVisible(false);
+        this.handState = HandState.OPEN;
 
+        
 
 
         ImageView v = new ImageView(new Image("Images/curseurs/"));
         v.setX(200);
         v.setY(200);
+        
+        destructor = new Destructor(windowSizeWidth, windowSizeHeight, param);
+        destructor.setVisible(false);
+        this.root.getChildren().add(destructor.getDestructor());
 
 
 
@@ -233,6 +256,39 @@ public class Controller extends Application {
             }
         });
     }
+    
+    public void tickTimer() {
+        Platform.runLater(new Runnable() {
+
+            @Override
+            public void run() {
+                switch (state) {
+                    case SUPER_FREE:
+                        break;
+                    case FREE:
+                        break;
+                    case ON_SUN:
+                        break;
+                    case SUN_SELECTED:
+                        break;
+                    case MENU:
+                        break;
+                    case CHANGE_SIZE:
+                       break;
+                    case CHANGE_OPACITY:
+                        break;
+                    case ON_CREATOR:
+                        break;
+                    case ON_DESTRUCTOR:
+                        destroy();
+                        
+                        
+                        break;
+                }
+            }
+        });
+    }
+    
 
     public void handOpened() {
         Platform.runLater(new Runnable() {
@@ -251,6 +307,7 @@ public class Controller extends Application {
                         break;
                     case SUN_SELECTED:
                         state = States.ON_SUN;
+
                         onSunShader();
                         handToOpen();
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
@@ -260,15 +317,18 @@ public class Controller extends Application {
                         onSunShader();
                         handToOpen();
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
+                        closeMenu();
                         break;
                     case CHANGE_SIZE:
                         state = States.ON_SUN;
+                        circleObjectArray.get(illuminateIndex).displayPipeSize(false);
                         onSunShader();
                         handToOpen();
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         break;
                     case CHANGE_OPACITY:
                         state = States.ON_SUN;
+                        circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
                         onSunShader();
                         handToOpen();
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
@@ -301,6 +361,7 @@ public class Controller extends Application {
                         handToClose();
                         help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
                         state = States.SUN_SELECTED;
+                        destructor.setVisible(true);
                         selectSunShader();
                         break;
                     case SUN_SELECTED:
@@ -318,9 +379,14 @@ public class Controller extends Application {
                                 state = States.CHANGE_SIZE;
                                 break;
                             case CANCEL:
+
                                 state = States.SUN_SELECTED;
+                                destructor.setVisible(true);
+
+
                                 break;
                         }
+                        closeMenu();
                         break;
                     case CHANGE_SIZE:
                         break;
@@ -330,6 +396,7 @@ public class Controller extends Application {
                         handToClose();
                         help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
                         state = States.SUN_SELECTED;
+                        
                         createAndSelectSunShader();
                         break;
                     case ON_DESTRUCTOR:
@@ -346,18 +413,19 @@ public class Controller extends Application {
 
             @Override
             public void run() {
+                System.out.println(state);
                 switch (state) {
                     case SUPER_FREE:
                         break;
                     case FREE:
                         move(x, y, z);
                         curseur.setPosition(kinectPosX, kinectPosY);
-                        if (illuminateIndex == -1) {
-                            state = States.ON_CREATOR;
-                            onCreator();
-                        } else if (illuminateIndex >= 0) {
+                        if (illuminateIndex >= 0) {
                             state = States.ON_SUN;
                             onSunShader();
+                        } else if (isOnBasket) {
+                            state = States.ON_CREATOR;
+                            onCreator();
                         }
                         break;
                     case ON_SUN:
@@ -371,34 +439,52 @@ public class Controller extends Application {
                         }
                         break;
                     case SUN_SELECTED:
-                        double myX = kinectPosX;
-                        double myY = kinectPosY;
-                        move(x, y, z);
-                        moveSunShader(kinectPosX - myX, kinectPosY - myY);
+                        moveSunShader(x, y, z);
+                        curseur.setPosition(kinectPosX, kinectPosY);
+                        if (isOnDestructor) {
+                            state = States.ON_DESTRUCTOR;
+                            onDestructor();
+                        }
                         break;
                     case MENU:
-                        move(x, y, z);
+                        //move(x, y, z);
                         break;
                     case CHANGE_SIZE:
-                        move(x, y, z);
+                        //move(x, y, z);
                         changeSize(z);
                         break;
                     case CHANGE_OPACITY:
-                        move(x, y, z);
+                        //move(x, y, z);
                         changeOpacity(z);
                         break;
                     case ON_CREATOR:
                         move(x, y, z);
-                        if (illuminateIndex != -1) {
+                        curseur.setPosition(kinectPosX, kinectPosY);
+                        if (!isOnBasket) {
                             state = States.FREE;
                             goToFree();
+                            basket.handOut();
+                            help.illuminateOptions();
                         }
                         break;
                     case ON_DESTRUCTOR:
-                        move(x, y, z);
-                        if (illuminateIndex != -2) {
-                            state = States.FREE;
-                            goToFree();
+                        if (illuminateIndex>=0) {
+                            moveSunShader(x, y, z);
+                        }else{
+                            move(x, y, z);
+                        }
+                        
+                        curseur.setPosition(kinectPosX, kinectPosY);
+                        if (!isOnDestructor) {
+                            timer.stop();
+                            
+                            if (illuminateIndex == -3) {
+                                destructor.setVisible(false);
+                                state = States.FREE;
+                                goToFree();
+                            } else {
+                                state = States.SUN_SELECTED;
+                            }
                         }
                         break;
 
@@ -524,19 +610,32 @@ public class Controller extends Application {
                     case SUPER_FREE:
                         break;
                     case FREE:
+                        handToFinger();
                         break;
                     case ON_SUN:
+                        handToFinger();
+                        help.illuminateOptions(Help.Etats.HAND_CLOSE);
                         break;
                     case SUN_SELECTED:
                         state = States.MENU;
                         openMenu(angle);
+                        handToFinger();
+                        help.illuminateOptions(Help.Etats.HAND_CLOSE, Help.Etats.HAND_OPEN);
                         break;
                     case MENU:
                         changeIndicator(angle);
                         break;
                     case CHANGE_SIZE:
+                        state = States.MENU;
+                        circleObjectArray.get(illuminateIndex).displayPipeSize(false);
+                        openMenu(angle);
+                        handToFinger();
                         break;
                     case CHANGE_OPACITY:
+                        state = States.MENU;
+                        circleObjectArray.get(illuminateIndex).displayPipeOpacity(false);
+                        openMenu(angle);
+                        handToFinger();
                         break;
                     case ON_CREATOR:
                         break;
@@ -815,24 +914,38 @@ public class Controller extends Application {
      * }
      */
     private void stopUser() {
+        for (CircleObject c : circleObjectArray) {
+            c.unSelect();
+            c.displayPipeOpacity(false);
+            c.displayPipeSize(false);
+            if (tmenu != null) {
+                tmenu.setVisible(false);
+                menu.getChildren().removeAll(menu.getChildren());
+            }
+            c.toNormal();
+        }
         manConnectionTool.disconnected();
         help.handWaveSetVisible(true);
         help.illuminateOptions();
         curseur.setVisible(false);
+        basket.hide();
     }
 
     private void startUser() {
         manConnectionTool.connected();
         help.handWaveSetVisible(false);
         curseur.setVisible(true);
+        curseur.changeToHandOpen();
+        basket.show();
     }
 
     private void goToFree() {
         for (CircleObject c : circleObjectArray) {
+            c.unSelect();
             c.toNormal();
         }
-        creator.disappears();
-        destructor.disappears();
+
+
     }
 
     private void handToOpen() {
@@ -852,6 +965,9 @@ public class Controller extends Application {
 
     // TODO faire les méthodes de tranistion
     private void onSunShader() {
+        destructor.setVisible(false);
+        basket.makeItFull();
+        circleObjectArray.get(illuminateIndex).unSelect();
         circleObjectArray.get(illuminateIndex).toIlluminate();
         switch (handState) {
             case CLOSE:
@@ -868,6 +984,7 @@ public class Controller extends Application {
 
     private void selectSunShader() {
         circleObjectArray.get(illuminateIndex).select();
+        basket.makeItEmpty();
     }
 
     private void createAndSelectSunShader() {
@@ -877,8 +994,10 @@ public class Controller extends Application {
         illuminateIndex = circleObjectArray.size() - 1;
         circleObjectArray.get(illuminateIndex).toIlluminate();
         circleObjectArray.get(illuminateIndex).select();
-        creator.sunCaught();
-        help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
+        basket.sunCaught();
+        basket.handOut();
+        destructor.setVisible(true);
+
     }
     // quand on a la main ouverte -1
 
@@ -894,16 +1013,35 @@ public class Controller extends Application {
                 help.illuminateOptions();
                 break;
         }
-        creator.appears();
+        basket.handIn();
     }
     // quand on est proche du destructeur -2
 
-    private void onDestructor() {
-        destructor.appears();
+    private void destroy() {
+        circleObjectArray.get(illuminateIndex).toNormal();
+        cercles.getChildren().remove(illuminateIndex);
+        circleObjectArray.remove(illuminateIndex);
+        destructor.addSun();
+        timer.stop();
+        majFeedback(kinectPosX, kinectPosY);
+        
     }
 
-    private void moveSunShader(double dx, double dy) {
-        translateSunShader(dx, dy - kinectPosY);
+    private void onDestructor() {
+        
+        timer.start();
+    }
+
+    private void moveSunShader(double x, double y, double z) {
+
+
+        double myX = x * 1;
+        double myY = y * 1;
+        translateSunShader(myX - kinectPosX, myY - kinectPosY);
+        kinectPosX = myX;
+        kinectPosY = myY;
+        kinectPosZ = z;
+        majFeedback(x, y);
     }
 
     private void initSize() {
@@ -959,6 +1097,7 @@ public class Controller extends Application {
     }
 
     private void openMenu(double d) {
+
         tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
         tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.CANCEL, TiltMenu.Type.SIZE);
         tmenu.setIndicator(d);
@@ -1000,11 +1139,10 @@ public class Controller extends Application {
                     tempIndex = i;
                 }
             }
-        } else if (destructor.proximity(x, y)) {
-            tempIndex = -2;
-        } else if (creator.proximity(x, y)) {
-            tempIndex = -1;
         }
+        isOnBasket = basket.proximity(x, y);
+        isOnDestructor = destructor.proximity(x, y);
+
         return tempIndex;
     }
 

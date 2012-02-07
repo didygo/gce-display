@@ -41,8 +41,8 @@ public class Help {
         this.totalGroup = new Group();
         this.background = new Rectangle(windowX, 100, Color.web("#000000", 0.4));
         this.handWave = new HandWave(windowX/2, windowY/2);
-        helpGroup.getChildren().add(background);
-        totalGroup.getChildren().addAll(helpGroup,handWave.getWave());
+        helpGroup.getChildren().addAll(background,handWave.getWave());
+        totalGroup.getChildren().addAll(helpGroup);
         helpGroup.setVisible(false);
         handWaveSetVisible(false);
         

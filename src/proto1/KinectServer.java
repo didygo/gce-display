@@ -22,17 +22,19 @@ public class KinectServer  {
     private Ivy bus;
     private String busAdress;
     private Controller ctrl;
-    private double windowSizeY, windowSizeX, kinectWindowSizeX, kinectWindowSizeY;
-    private Timer timer;
+    private double windowHeight, windowWidth, kinectWindowSizeX, kinectWindowSizeY;
     private Date dateTemp;
+    private ParamManager param;
+    
 
-    public KinectServer(Controller c, String adresse, double wX, double wY) {
+    public KinectServer(Controller c, String adresse, double wX, double wY, ParamManager param) {
+        this.param = param;
         this.ctrl = c;
         this.busAdress = adresse;
-        this.windowSizeX = wX;
-        this.windowSizeY = wY;
-        this.kinectWindowSizeX = 640;
-        this.kinectWindowSizeY = 480;
+        this.windowWidth = wX;
+        this.windowHeight = wY;
+        this.kinectWindowSizeX = param.kinectWindowWidth;
+        this.kinectWindowSizeY = param.kinectWindowHeight;
         dateTemp = new Date();
 
 
@@ -51,8 +53,8 @@ public class KinectServer  {
     }
     
     public void changeWindowSize(double x, double y){
-        windowSizeX = x;
-        windowSizeY = y;
+        windowWidth = x;
+        windowHeight = y;
     }
     
     public void disconnect(){
@@ -166,12 +168,24 @@ public class KinectServer  {
 
                 @Override
                 public void receive(IvyClient client, String[] args) {
-                    //System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1]+ " Z=" + args[2]);
+                    System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1]+ " Z=" + args[2]);
 
-                    ctrl.handMove(
-                            ((double) Integer.parseInt(args[0])) * windowSizeX / kinectWindowSizeX,
-                            ((double) Integer.parseInt(args[1])) * windowSizeY / kinectWindowSizeY,
-                            ((double) Integer.parseInt(args[2])));
+                    double x = (double) Integer.parseInt(args[0]);
+                    double y = (double) Integer.parseInt(args[1]);
+                    double z = (double) Integer.parseInt(args[2]);
+                    
+                    
+                    
+                    x = (x*windowWidth)/kinectWindowSizeX +(2*x/kinectWindowSizeX - 1)*param.windowBorderY;
+                    y = (y*windowHeight)/kinectWindowSizeY + (2*y/kinectWindowSizeY - 1)*param.windowBorderY;
+                    
+                    System.out.println("x=" + x + "  y="+y);
+                    
+                    if (x<50) x = 50;
+                    if (x>windowWidth-50) x = windowWidth-50;
+                    if (y<50) y =50;
+                    if (y>windowHeight-50) y = windowHeight-50;
+                    ctrl.handMove(x,y,z);
                 }
             });
         } catch (IvyException ex) {

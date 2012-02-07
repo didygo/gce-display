@@ -4,6 +4,7 @@
  */
 package proto1;
 
+import java.awt.event.ActionListener;
 import proto2.*;
 import javafx.animation.PathTransition;
 import javafx.event.ActionEvent;
@@ -15,6 +16,7 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.util.Duration;
+import javax.swing.Timer;
 
 /**
  *
@@ -22,36 +24,30 @@ import javafx.util.Duration;
  */
 public class Curseur {
 
-    ImageView curseur;
+    ImageView curseur,imgTimer;
     PathTransition transition;
-    Path path;
-    Group dede = new Group();
     double ancienX = 0;
     double ancienY = 0;
     boolean play = false;
-    Duration transitionTime =  Duration.millis(50);
+    Duration transitionTime =  Duration.millis(100);
     Group curseurGroup = new Group();
+    Timer timer;
 
     public Curseur(Group g) {
         curseur = new ImageView(new Image("Images/curseurs/mainFermee.png"));
+        imgTimer = new ImageView(new Image("Images/curseurs/"));
         curseur.setX(-50);
         curseur.setY(-50);
-        path = new Path();
-        path.setVisible(true);
-        transition = new PathTransition();
-        transition.setNode(curseurGroup);
-        transition.setDuration(transitionTime);
-        transition.setPath(path);
         curseurGroup.getChildren().add(curseur);
-        g.getChildren().addAll(curseurGroup, path);
+        g.getChildren().addAll(curseurGroup);
         
-        
-       
 
         
     }
 
-    ;
+    public void changeToTimer(){
+        
+    }
 
     public void changeToLibre() {
         curseur.setVisible(false);
@@ -89,17 +85,5 @@ public class Curseur {
             curseurGroup.setTranslateY(y);
 
     }
-    public void setPositionKinect(double x, double y) {
 
-            ancienX = curseurGroup.getTranslateX();
-            ancienY = curseurGroup.getTranslateY();
-            path.getElements().removeAll(path.getElements());
-            path.getElements().add(new MoveTo(ancienX, ancienY));
-            path.getElements().add(new LineTo(x, y));
-            ancienX = x;
-            ancienY = y;
-            transition.play();
-      
-
-    }
 }
