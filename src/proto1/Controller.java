@@ -198,9 +198,9 @@ public class Controller extends Application {
         this.adresseBus = "169.254.255.255:2010";
         this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight,param);
         //////////////////////////////////////////////////////////////
-        //gestionEvenementsSouris(scene);
+        gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
-        this.state = States.SUPER_FREE;
+        this.state = States.FREE;
         this.basket = new CircleBasket(root, windowSizeWidth, windowSizeHeight, param);
 
         this.circleObjectArray = new ArrayList();
@@ -214,7 +214,7 @@ public class Controller extends Application {
 
 
         this.curseur = new Curseur(root);
-        this.curseur.setVisible(false);
+        this.curseur.setVisible(true);
         this.handState = HandState.OPEN;
 
         
@@ -1030,6 +1030,7 @@ public class Controller extends Application {
     private void onDestructor() {
         
         timer.start();
+        curseur.startTimer();
     }
 
     private void moveSunShader(double x, double y, double z) {
