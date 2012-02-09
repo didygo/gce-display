@@ -93,7 +93,7 @@ public class Controller extends Application {
             this.windowSizeHeight = param.windowSizeHeight;
         }
 
-        
+
 
     }
 
@@ -141,7 +141,7 @@ public class Controller extends Application {
         this.scene = new Scene(root, windowSizeWidth, windowSizeHeight);
 
 
-        this.background = new ImageView(new Image("Images/fonds/ciel3.jpg"));
+        this.background = new ImageView(new Image("Images/fonds/ciel4.jpg"));
         primaryStage.setScene(scene);
         this.root.getChildren().add(background);
         ////////////////////////////////////////
@@ -178,16 +178,16 @@ public class Controller extends Application {
                 }
             }
         });
-        timer = new Timer(1000, new ActionListener() {
+        timer = new Timer(param.timerDuration, new ActionListener() {
 
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 tickTimer();
             }
         });
-        
-        
-        
+
+
+
         this.stage.setFullScreen(fullScreen);
         initComponents();
     }
@@ -196,7 +196,7 @@ public class Controller extends Application {
     public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
         this.adresseBus = "169.254.255.255:2010";
-        this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight,param);
+        this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight, param);
         //////////////////////////////////////////////////////////////
         gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
@@ -211,31 +211,23 @@ public class Controller extends Application {
 
         this.connectionTool = new ConnectionTool(root, windowSizeWidth - 50, windowSizeHeight - 50, kinectServer);
         this.manConnectionTool = new ManConnectionTool(root, windowSizeWidth - 150, windowSizeHeight - 50, kinectServer);
-
-
-        this.curseur = new Curseur(root);
-        this.curseur.setVisible(true);
-        this.handState = HandState.OPEN;
-
         
+   
 
-
-        ImageView v = new ImageView(new Image("Images/curseurs/"));
-        v.setX(200);
-        v.setY(200);
-        
         destructor = new Destructor(windowSizeWidth, windowSizeHeight, param);
         destructor.setVisible(false);
         this.root.getChildren().add(destructor.getDestructor());
 
-
+        this.curseur = new Curseur(root, param);
+        this.curseur.setVisible(true);
+        this.handState = HandState.OPEN;
 
         help = new Help(windowSizeWidth, windowSizeHeight);
         help.addImg("Images/help/doigtGris.png", Help.Etats.FINGER);
         help.addImg("Images/help/mainFermeeGris.png", Help.Etats.HAND_CLOSE);
         help.addImg("Images/help/mainOuverteGris.png", Help.Etats.HAND_OPEN);
 
-        root.getChildren().addAll(v, help.getHelp());
+        root.getChildren().addAll(help.getHelp());
 
         //primaryStage.setFullScreen(true);
 
@@ -256,7 +248,7 @@ public class Controller extends Application {
             }
         });
     }
-    
+
     public void tickTimer() {
         Platform.runLater(new Runnable() {
 
@@ -274,21 +266,20 @@ public class Controller extends Application {
                     case MENU:
                         break;
                     case CHANGE_SIZE:
-                       break;
+                        break;
                     case CHANGE_OPACITY:
                         break;
                     case ON_CREATOR:
                         break;
                     case ON_DESTRUCTOR:
                         destroy();
-                        
-                        
+
+
                         break;
                 }
             }
         });
     }
-    
 
     public void handOpened() {
         Platform.runLater(new Runnable() {
@@ -396,7 +387,7 @@ public class Controller extends Application {
                         handToClose();
                         help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
                         state = States.SUN_SELECTED;
-                        
+
                         createAndSelectSunShader();
                         break;
                     case ON_DESTRUCTOR:
@@ -468,16 +459,17 @@ public class Controller extends Application {
                         }
                         break;
                     case ON_DESTRUCTOR:
-                        if (illuminateIndex>=0) {
+                        if (illuminateIndex >= 0) {
                             moveSunShader(x, y, z);
-                        }else{
+                        } else {
                             move(x, y, z);
                         }
-                        
+
                         curseur.setPosition(kinectPosX, kinectPosY);
                         if (!isOnDestructor) {
                             timer.stop();
-                            
+                            curseur.stopTimer();
+
                             if (illuminateIndex == -3) {
                                 destructor.setVisible(false);
                                 state = States.FREE;
@@ -1023,12 +1015,13 @@ public class Controller extends Application {
         circleObjectArray.remove(illuminateIndex);
         destructor.addSun();
         timer.stop();
+        curseur.stopTimer();
         majFeedback(kinectPosX, kinectPosY);
-        
+
     }
 
     private void onDestructor() {
-        
+
         timer.start();
         curseur.startTimer();
     }

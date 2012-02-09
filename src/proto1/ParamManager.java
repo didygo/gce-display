@@ -17,8 +17,8 @@ public class ParamManager {
     //taille de la fenêtre en normal et plein écran
     double windowSizeWidth = 800;
     double windowSizeHeight = 600;
-    double windowSizeWidthFull = 1440;
-    double windowSizeHeightFull = 900;
+    double windowSizeWidthFull = 1920;
+    double windowSizeHeightFull = 1200;
     double windowBorderY = 100;
     double windowBorderX = 100;
     
@@ -43,6 +43,8 @@ public class ParamManager {
     double defaultSize = 90;
     double defaultOpacity = 80;
     
+    //timer destructeur en milisecondes
+    int timerDuration = 1000;
     public ParamManager(){
         
     }

@@ -4,20 +4,20 @@
  */
 package proto1;
 
-import java.awt.event.ActionListener;
 import javafx.animation.KeyFrame;
-import proto2.*;
 import javafx.animation.PathTransition;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.effect.BoxBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcTo;
-import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.StrokeLineCap;
 import javafx.util.Duration;
 import javax.swing.Timer;
 
@@ -37,13 +37,17 @@ public class Curseur {
     Group curseurGroup = new Group();
     Timer timer;
     private Loading loading;
+    private ParamManager param;
 
-    public Curseur(Group g) {
+    public Curseur(Group g, ParamManager param) {
         loading = new Loading();
+        this.param = param;
         curseur = new ImageView(new Image("Images/curseurs/mainFermee.png"));
-        imgTimer = new ImageView(new Image("Images/curseurs/"));
+        imgTimer = new ImageView(new Image("Images/curseurs/neutre.png"));
         curseur.setX(-50);
         curseur.setY(-50);
+        imgTimer.setX(-50);
+        imgTimer.setY(-50);
         curseurGroup.getChildren().addAll(curseur,imgTimer,loaderGroup);
         imgTimer.setVisible(false);
         g.getChildren().addAll(curseurGroup);
@@ -55,6 +59,7 @@ public class Curseur {
     
 
     public void startTimer() {
+        loading = new Loading();
         loading.playAnimation();
     }
     
@@ -108,22 +113,41 @@ public class Curseur {
         private ArcTo arc1, arc2;
         private Timeline time1, time2;
         private Path p1, p2;
-        private double param;
+        private double p;
         private double rayon = 20;
         
 
         public Loading() {
-            param = Math.PI / 2;
-            p1 = new Path(new MoveTo(0, 20));
-            p2 = new Path(new MoveTo(0, -20));
+            BoxBlur box = new BoxBlur(3, 3, 10);
+            p = Math.PI / 2;
+            p1 = new Path();
+            p1.getElements().add(new MoveTo(0, -rayon));
+            p2 = new Path();
+            p2.getElements().add(new MoveTo(0, rayon));
             arc2 = new ArcTo();
             arc1 = new ArcTo();
             p1.getElements().add(arc1);
             p2.getElements().add(arc2);
-            arc1.setX(rayon * Math.cos(param));
-            arc1.setY(-rayon * Math.sin(param));
-            arc2.setX(rayon * Math.cos(param));
-            arc2.setY(-rayon * Math.sin(param));
+            arc1.setX(rayon * Math.cos(p));
+            arc1.setY(-rayon * Math.sin(p));
+            arc1.setRadiusX(rayon);
+            arc1.setRadiusY(rayon);
+            arc2.setX(rayon * Math.cos(-p));
+            arc2.setY(-rayon * Math.sin(-p));
+            arc2.setRadiusX(rayon);
+            arc2.setRadiusY(rayon);
+            arc1.setSweepFlag(true);
+            arc2.setSweepFlag(true);
+            
+            //style
+            p1.setStrokeWidth(8);
+            p1.setStroke(Color.WHITE);
+            p1.setEffect(box);
+            p2.setStrokeWidth(8);
+            p2.setEffect(box);
+            p2.setStroke(Color.WHITE);
+            p1.setStrokeLineCap(StrokeLineCap.ROUND);
+            p2.setStrokeLineCap(StrokeLineCap.ROUND);
 
             
 
@@ -133,10 +157,10 @@ public class Curseur {
 
                 @Override
                 public void handle(ActionEvent t) {
-                    param -= 0.01;
-                    arc1.setX(100 + rayon * Math.cos(param));
-                    arc1.setY(150 - rayon * Math.sin(param));
-                    if (param <= -Math.PI / 2) {
+                    p -= Math.PI*20/(param.timerDuration);
+                    arc1.setX(rayon * Math.cos(p));
+                    arc1.setY(-rayon * Math.sin(p));
+                    if (p <= -Math.PI / 2) {
                         
                         
                         time1.stop();
@@ -152,10 +176,10 @@ public class Curseur {
 
                 @Override
                 public void handle(ActionEvent t) {
-                    param -= 0.01;
-                    arc2.setX(100 + rayon * Math.cos(param));
-                    arc2.setY(150 - rayon * Math.sin(param));
-                    if (param <= -3*Math.PI / 2) {
+                    p -= Math.PI*20/(param.timerDuration);
+                    arc2.setX(rayon * Math.cos(p));
+                    arc2.setY(-rayon * Math.sin(p));
+                    if (p <= -3*Math.PI / 2) {
                         
                         imgTimer.setVisible(false);
                       
