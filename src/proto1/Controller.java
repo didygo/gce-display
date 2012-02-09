@@ -139,11 +139,9 @@ public class Controller extends Application {
         this.kinectWindowSizeHeight = param.kinectWindowHeight;
         this.root = new Group();
         this.scene = new Scene(root, windowSizeWidth, windowSizeHeight);
-
-
-        this.background = new ImageView(new Image("Images/fonds/ciel4.jpg"));
         primaryStage.setScene(scene);
-        this.root.getChildren().add(background);
+
+        loadBackground();
         ////////////////////////////////////////
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -195,7 +193,7 @@ public class Controller extends Application {
     // initilaise le bus logiciel, et les composants graphiques
     public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
-        this.adresseBus = "169.254.255.255:2010";
+        this.adresseBus = "127.255.255.255:2010";
         this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight, param);
         //////////////////////////////////////////////////////////////
         gestionEvenementsSouris(scene);
@@ -232,6 +230,20 @@ public class Controller extends Application {
         //primaryStage.setFullScreen(true);
 
         root.getChildren().add(new Config().getConfig());
+    }
+    
+    
+    public void loadBackground(){
+        this.background = new ImageView(new Image("Images/fonds/ciel4.jpg"));
+        
+        this.root.getChildren().add(background);
+        double dw = windowSizeWidth/background.getImage().getWidth();
+        double dh = windowSizeHeight/background.getImage().getHeight();
+        background.setScaleX(dw);
+        background.setScaleY(dh);
+        System.out.println(background.getImage().getWidth()*(dw-1)/2);
+        background.setX(background.getImage().getWidth()*(dw-1)/2);
+        background.setY(background.getImage().getHeight()*(dh-1)/2);
     }
 
     public void kinectconnection(final boolean b) {
@@ -404,13 +416,13 @@ public class Controller extends Application {
 
             @Override
             public void run() {
-                System.out.println(state);
+                //System.out.println(state);
                 switch (state) {
                     case SUPER_FREE:
                         break;
                     case FREE:
                         move(x, y, z);
-                        curseur.setPosition(kinectPosX, kinectPosY);
+                        curseur.setPosition(kinectPosX, kinectPosY, kinectPosZ);
                         if (illuminateIndex >= 0) {
                             state = States.ON_SUN;
                             onSunShader();
@@ -422,7 +434,7 @@ public class Controller extends Application {
                     case ON_SUN:
                         int tempIndex = illuminateIndex;
                         move(x, y, z);
-                        curseur.setPosition(kinectPosX, kinectPosY);
+                        curseur.setPosition(kinectPosX, kinectPosY, kinectPosZ);
                         if (illuminateIndex != tempIndex) {
                             help.illuminateOptions();
                             state = States.FREE;
@@ -431,7 +443,7 @@ public class Controller extends Application {
                         break;
                     case SUN_SELECTED:
                         moveSunShader(x, y, z);
-                        curseur.setPosition(kinectPosX, kinectPosY);
+                        curseur.setPosition(kinectPosX, kinectPosY, kinectPosZ);
                         if (isOnDestructor) {
                             state = States.ON_DESTRUCTOR;
                             onDestructor();
@@ -450,7 +462,7 @@ public class Controller extends Application {
                         break;
                     case ON_CREATOR:
                         move(x, y, z);
-                        curseur.setPosition(kinectPosX, kinectPosY);
+                        curseur.setPosition(kinectPosX, kinectPosY, kinectPosZ);
                         if (!isOnBasket) {
                             state = States.FREE;
                             goToFree();
@@ -465,7 +477,7 @@ public class Controller extends Application {
                             move(x, y, z);
                         }
 
-                        curseur.setPosition(kinectPosX, kinectPosY);
+                        curseur.setPosition(kinectPosX, kinectPosY, kinectPosZ);
                         if (!isOnDestructor) {
                             timer.stop();
                             curseur.stopTimer();
@@ -1166,7 +1178,7 @@ public class Controller extends Application {
                 // System.out.println("KINECT_POSITION SEND X=" + (int) (me.getX()*kinectWindowSizeX/windowSizeX) + " Y=" + (int) (me.getY()*kinectWindowSizeY/windowSizeY ));
 
 
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z=0");
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z="+ (int) (me.getX() * (kinectWindowSizeWidth+300) / windowSizeWidth));
             }
         });
 
@@ -1184,7 +1196,7 @@ public class Controller extends Application {
             @Override
             public void handle(MouseEvent me) {
 
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z=0");
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z="+ (int) (me.getX() * (kinectWindowSizeWidth+300) / windowSizeWidth));
             }
         });
 

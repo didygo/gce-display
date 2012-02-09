@@ -168,7 +168,7 @@ public class KinectServer  {
 
                 @Override
                 public void receive(IvyClient client, String[] args) {
-                    System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1]+ " Z=" + args[2]);
+                    //System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1]+ " Z=" + args[2]);
 
                     double x = (double) Integer.parseInt(args[0]);
                     double y = (double) Integer.parseInt(args[1]);

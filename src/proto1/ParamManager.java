@@ -45,6 +45,10 @@ public class ParamManager {
     
     //timer destructeur en milisecondes
     int timerDuration = 1000;
+    
+    //paramètres pour les maxima et minima de profondeur (relatifs à l'affichage)
+    double minDepthIHM = 500;
+    double maxDepthIHM = 1000;
     public ParamManager(){
         
     }
