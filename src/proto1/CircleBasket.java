@@ -30,7 +30,6 @@ public class CircleBasket {
   
 
     private enum Etats {
-
         OPEN_SUN, OPEN_EMPTY, CLOSE_FULL, CLOSE_EMPTY
     }
     private Etats etat = Etats.CLOSE_FULL;
@@ -81,30 +80,31 @@ public class CircleBasket {
         pathReturn.getElements().add(new LineTo(x, basketY));
         //pathReturn.setVisible(false);
     }
-    
-    
+       
     // je metz un sushader dans le panier ouvert
     public void sunDroped(){
         basketImg.setImage(new Image("Images/tiroir/tiroirPlein.png"));
         etat = Etats.OPEN_SUN;
     }
+    
     // je prends un Sunshader dans le panier ouvert
     public void sunCaught(){
             basketImg.setImage(new Image("Images/tiroir/tiroirVide.png"));
         etat = Etats.OPEN_EMPTY;
     }
+    
      // le panier fermé devient fermé et vide
     public void makeItEmpty(){
         etat = Etats.CLOSE_EMPTY;
         basketImg.setImage(new Image("Images/tiroir/tiroirVide.png"));
     }
     
-    
     // le panier fermé devient fermé et contient un Sunshader
     public void makeItFull(){
         etat = Etats.CLOSE_FULL;
         basketImg.setImage(new Image("Images/tiroir/tiroirPlein.png"));
     }
+    
     public void handIn() {
         switch (etat) {
             case CLOSE_EMPTY:
@@ -121,7 +121,6 @@ public class CircleBasket {
                 break;
             case OPEN_SUN:
                 break;
-
         }
     }
 
@@ -141,11 +140,8 @@ public class CircleBasket {
                 closeWithSun();
                 etat = Etats.CLOSE_FULL;
                 break;
-
         }
     }
-   
-    
 
     private void openWithSun() {
         transition.stop();
@@ -162,6 +158,7 @@ public class CircleBasket {
         transition.setPath(pathGo);
         transition.play();
     }
+    
     private void closeWithoutSun() {
         transition.stop();
         //changer l'image
@@ -169,6 +166,7 @@ public class CircleBasket {
         transition.setPath(pathReturn);
         transition.play();
     }
+    
     private void closeWithSun() {
         transition.stop();
         //changer l'image
@@ -177,12 +175,10 @@ public class CircleBasket {
         transition.play();
     }
 
-    
-
     public boolean proximity(double x, double y) {
-       
-       return (x>basketImg.getX()-basketImg.getImage().getWidth()/2-100  && y<basketImg.getY() + basketImg.getImage().getWidth()/2  && y>basketImg.getY() - basketImg.getImage().getWidth()/2 );
-        
+       return (x>basketImg.getX()-basketImg.getImage().getWidth()/2-100  && 
+               y<basketImg.getY() + basketImg.getImage().getWidth()/2  && 
+               y>basketImg.getY() - basketImg.getImage().getWidth()/2 );
     }
     
     public void hide(){

@@ -56,6 +56,7 @@ public class Controller extends Application {
     // panier qui détruit le sunshader`
     private Destructor destructor;
     private boolean isOnDestructor = false;
+    private boolean isOnHelp = false;
     // varaible de sélection : -1 pour le panier , -2 pour rien , 0..infini pour les sunshader
     int illuminateIndex = -2;
     //variables pour le resize 
@@ -95,7 +96,8 @@ public class Controller extends Application {
     }
 
     public enum States {
-        SUPER_FREE, FREE, ON_SUN, SUN_SELECTED, CHANGE_SIZE, CHANGE_OPACITY, MENU, ON_CREATOR, ON_DESTRUCTOR
+
+        SUPER_FREE, FREE, ON_SUN, SUN_SELECTED, CHANGE_SIZE, CHANGE_OPACITY, MENU, ON_CREATOR, ON_DESTRUCTOR, ON_HELP
     }
     private States state;
 
@@ -111,7 +113,6 @@ public class Controller extends Application {
 
     //////////////////////////////////////
     private void init(Stage primaryStage) {
-
         this.stage = primaryStage;
 
         /// init des variables
@@ -150,6 +151,7 @@ public class Controller extends Application {
         });
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+
             @Override
             public void handle(final KeyEvent arg0) {
                 if (arg0.getCode() == KeyCode.F) {
@@ -170,15 +172,14 @@ public class Controller extends Application {
                 }
             }
         });
-        
+
         timer = new Timer(param.timerDuration, new ActionListener() {
+
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 tickTimer();
             }
         });
-
-
 
         this.stage.setFullScreen(fullScreen);
         initComponents();
@@ -187,12 +188,12 @@ public class Controller extends Application {
     // initilaise le bus logiciel, et les composants graphiques
     public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
-        this.adresseBus = "169.254.255.255:2010";
+        this.adresseBus = "127.255.255.255:2010";
         this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight, param);
         //////////////////////////////////////////////////////////////
         gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
-        this.state = States.SUPER_FREE;
+        this.state = States.FREE;
         this.basket = new CircleBasket(root, windowSizeWidth, windowSizeHeight, param);
 
         this.circleObjectArray = new ArrayList();
@@ -203,16 +204,10 @@ public class Controller extends Application {
 
         this.connectionTool = new ConnectionTool(root, windowSizeWidth - 50, windowSizeHeight - 50, kinectServer);
         this.manConnectionTool = new ManConnectionTool(root, windowSizeWidth - 150, windowSizeHeight - 50, kinectServer);
-        
-   
 
         destructor = new Destructor(windowSizeWidth, windowSizeHeight, param);
         destructor.setVisible(false);
         this.root.getChildren().add(destructor.getDestructor());
-
-        this.curseur = new Curseur(root, param);
-        this.curseur.setVisible(false);
-        this.handState = HandState.OPEN;
 
         help = new Help(windowSizeWidth, windowSizeHeight);
         help.addImg("Images/help/doigtGris.png", Help.Etats.FINGER);
@@ -220,24 +215,29 @@ public class Controller extends Application {
         help.addImg("Images/help/mainOuverteGris.png", Help.Etats.HAND_OPEN);
 
         root.getChildren().addAll(help.getHelp());
-
+        
+        this.curseur = new Curseur(root, param);
+        this.curseur.setVisible(true);
+        this.handState = HandState.OPEN;
+        
         //primaryStage.setFullScreen(true);
 
         root.getChildren().add(new Config().getConfig());
-    }
-    
-    
-    public void loadBackground(){
-        this.background = new ImageView(new Image("Images/fonds/ciel2.jpg"));
         
+        help.helpVisible(true);
+    }
+
+    public void loadBackground() {
+        this.background = new ImageView(new Image("Images/fonds/ciel2.jpg"));
+
         this.root.getChildren().add(background);
-        double dw = windowSizeWidth/background.getImage().getWidth();
-        double dh = windowSizeHeight/background.getImage().getHeight();
+        double dw = windowSizeWidth / background.getImage().getWidth();
+        double dh = windowSizeHeight / background.getImage().getHeight();
         background.setScaleX(dw);
         background.setScaleY(dh);
-        System.out.println(background.getImage().getWidth()*(dw-1)/2);
-        background.setX(background.getImage().getWidth()*(dw-1)/2);
-        background.setY(background.getImage().getHeight()*(dh-1)/2);
+        System.out.println(background.getImage().getWidth() * (dw - 1) / 2);
+        background.setX(background.getImage().getWidth() * (dw - 1) / 2);
+        background.setY(background.getImage().getHeight() * (dh - 1) / 2);
     }
 
     public void kinectconnection(final boolean b) {
@@ -279,9 +279,14 @@ public class Controller extends Application {
                         break;
                     case ON_DESTRUCTOR:
                         destroy();
-
-
                         break;
+                    case ON_HELP:
+                        //help.helpVisible(!help.isVisible());
+                        if (help.isIn()) help.helpOut();
+                        else help.helpIn();
+                        timer.stop();
+                        curseur.stopTimer();
+                        majFeedback(kinectPosX, kinectPosY);
                 }
             }
         });
@@ -304,7 +309,6 @@ public class Controller extends Application {
                         break;
                     case SUN_SELECTED:
                         state = States.ON_SUN;
-
                         onSunShader();
                         handToOpen();
                         help.illuminateOptions(Help.Etats.HAND_CLOSE);
@@ -376,11 +380,8 @@ public class Controller extends Application {
                                 state = States.CHANGE_SIZE;
                                 break;
                             case CANCEL:
-
                                 state = States.SUN_SELECTED;
                                 destructor.setVisible(true);
-
-
                                 break;
                         }
                         closeMenu();
@@ -393,7 +394,6 @@ public class Controller extends Application {
                         handToClose();
                         help.illuminateOptions(Help.Etats.HAND_OPEN, Help.Etats.FINGER);
                         state = States.SUN_SELECTED;
-
                         createAndSelectSunShader();
                         break;
                     case ON_DESTRUCTOR:
@@ -423,6 +423,9 @@ public class Controller extends Application {
                         } else if (isOnBasket) {
                             state = States.ON_CREATOR;
                             onCreator();
+                        } else if (isOnHelp) {
+                            state = States.ON_HELP;
+                            onHelp();
                         }
                         break;
                     case ON_SUN:
@@ -486,7 +489,25 @@ public class Controller extends Application {
                             }
                         }
                         break;
-
+                    case ON_HELP:
+                        if (illuminateIndex >= 0) {
+                            moveSunShader(x, y, z);
+                        } else {
+                            move(x, y, z);
+                        }
+                        curseur.setPosition(kinectPosX, kinectPosY, kinectPosZ);
+                        if (!isOnHelp) {
+                            timer.stop();
+                            curseur.stopTimer();
+                            if (illuminateIndex == -3) {
+                                state = States.FREE;
+                                goToFree();
+                            } else {
+                                state = States.ON_SUN;
+                                onSunShader();
+                            }
+                        }
+                        break;
                 }
             }
         });
@@ -530,6 +551,7 @@ public class Controller extends Application {
                 switch (state) {
                     case SUPER_FREE:
                         state = States.FREE;
+                        goToFree();
                         startUser();
                         break;
                     case FREE:
@@ -646,7 +668,6 @@ public class Controller extends Application {
         });
     }
 
-   
     private void stopUser() {
         for (CircleObject c : circleObjectArray) {
             c.unSelect();
@@ -674,12 +695,11 @@ public class Controller extends Application {
     }
 
     private void goToFree() {
+       // helpTool.setVisible(true);
         for (CircleObject c : circleObjectArray) {
             c.unSelect();
             c.toNormal();
         }
-
-
     }
 
     private void handToOpen() {
@@ -717,6 +737,7 @@ public class Controller extends Application {
     }
 
     private void selectSunShader() {
+        help.helpVisible(false);
         circleObjectArray.get(illuminateIndex).select();
         basket.makeItEmpty();
     }
@@ -759,11 +780,14 @@ public class Controller extends Application {
         timer.stop();
         curseur.stopTimer();
         majFeedback(kinectPosX, kinectPosY);
-
     }
 
     private void onDestructor() {
+        timer.start();
+        curseur.startTimer();
+    }
 
+    private void onHelp() {
         timer.start();
         curseur.startTimer();
     }
@@ -789,16 +813,13 @@ public class Controller extends Application {
         if (z < limitLeft) {
             circleObjectArray.get(illuminateIndex).changeSize(z - limitLeft);
             limitLeft = z;
-
             distance2handsKinect = limitLeft + segmentSizeResize / 2;
             limitRight = limitLeft + segmentSizeResize;
-
         } else if (z > limitRight) {
             circleObjectArray.get(illuminateIndex).changeSize(z - limitRight);
             limitRight = z;
             distance2handsKinect = limitRight - segmentSizeResize / 2;
             limitLeft = limitRight - segmentSizeResize;
-
         }
     }
 
@@ -815,14 +836,11 @@ public class Controller extends Application {
             limitBack = z;
             distanceZkinect += limitBack - segmentSizeOpacity / 2;
             limitFront = limitBack - segmentSizeOpacity;
-
-
         } else if (z < limitFront) {
             circleObjectArray.get(illuminateIndex).changeOpacity(z - limitFront);
             limitFront = z;
             distanceZkinect += limitFront + segmentSizeOpacity / 2;
             limitBack = limitFront + segmentSizeOpacity;
-
         }
     }
 
@@ -831,7 +849,6 @@ public class Controller extends Application {
     }
 
     private void openMenu(double d) {
-
         tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
         tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.CANCEL, TiltMenu.Type.SIZE);
         tmenu.setIndicator(d);
@@ -876,7 +893,7 @@ public class Controller extends Application {
         }
         isOnBasket = basket.proximity(x, y);
         isOnDestructor = destructor.proximity(x, y);
-
+        isOnHelp = help.proximity(x, y);
         return tempIndex;
     }
 
@@ -888,6 +905,7 @@ public class Controller extends Application {
     private void gestionEvenementsSouris(Scene scene) {
         kinectServer.sendToSelf(true);
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
+
             @Override
             public void handle(MouseEvent me) {
                 kinectServer.send("KINECT_HAND_OPENED=false");
@@ -895,14 +913,16 @@ public class Controller extends Application {
         });
 
         scene.setOnMouseMoved(new EventHandler<MouseEvent>() {
+
             @Override
             public void handle(MouseEvent me) {
                 // System.out.println("KINECT_POSITION SEND X=" + (int) (me.getX()*kinectWindowSizeX/windowSizeX) + " Y=" + (int) (me.getY()*kinectWindowSizeY/windowSizeY ));
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z="+ (int) (me.getX() * (kinectWindowSizeWidth+300) / windowSizeWidth));
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z=" + (int) (me.getX() * (kinectWindowSizeWidth + 300) / windowSizeWidth));
             }
         });
 
         scene.setOnMouseReleased(new EventHandler<MouseEvent>() {
+
             @Override
             public void handle(MouseEvent me) {
                 kinectServer.send("KINECT_HAND_OPENED=true");
@@ -910,9 +930,10 @@ public class Controller extends Application {
         });
 
         scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
+
             @Override
             public void handle(MouseEvent me) {
-                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z="+ (int) (me.getX() * (kinectWindowSizeWidth+300) / windowSizeWidth));
+                kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z=" + (int) (me.getX() * (kinectWindowSizeWidth + 300) / windowSizeWidth));
             }
         });
     }
