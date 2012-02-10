@@ -176,15 +176,18 @@ public class KinectServer  {
                     
                     
                     
-                    x = (x*windowWidth)/kinectWindowSizeX +(2*x/kinectWindowSizeX - 1)*param.windowBorderY;
+                    x = (x*windowWidth)/kinectWindowSizeX +(2*x/kinectWindowSizeX - 1)*param.windowBorderX;
                     y = (y*windowHeight)/kinectWindowSizeY + (2*y/kinectWindowSizeY - 1)*param.windowBorderY;
                     
-                    System.out.println("x=" + x + "  y="+y);
+                    
                     
                     if (x<50) x = 50;
                     if (x>windowWidth-50) x = windowWidth-50;
                     if (y<50) y =50;
                     if (y>windowHeight-50) y = windowHeight-50;
+                    
+                    
+                    //System.out.println("x=" + x + "  y="+y);
                     ctrl.handMove(x,y,z);
                 }
             });

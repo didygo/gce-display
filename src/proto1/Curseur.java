@@ -82,7 +82,7 @@ public class Curseur {
     }
 
     public void setVisible(boolean b) {
-        curseur.setVisible(b);
+        curseurGroup.setVisible(b);
     }
 
     public void changeToFingerOn() {
@@ -104,7 +104,7 @@ public class Curseur {
 
     }
 
-    private void changeColorDepth(double z) {
+    public void changeColorDepth(double z) {
         if (z <= param.minDepthIHM + 50) {
             
             backCircleRed.setOpacity((param.minDepthIHM + 50 - z) / 50);

@@ -193,12 +193,12 @@ public class Controller extends Application {
     // initilaise le bus logiciel, et les composants graphiques
     public void initComponents() {
         /// 2) Initialisation du bus de communication inter logiciel ///
-        this.adresseBus = "127.255.255.255:2010";
+        this.adresseBus = "169.254.255.255:2010";
         this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight, param);
         //////////////////////////////////////////////////////////////
         gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
-        this.state = States.FREE;
+        this.state = States.SUPER_FREE;
         this.basket = new CircleBasket(root, windowSizeWidth, windowSizeHeight, param);
 
         this.circleObjectArray = new ArrayList();
@@ -217,7 +217,7 @@ public class Controller extends Application {
         this.root.getChildren().add(destructor.getDestructor());
 
         this.curseur = new Curseur(root, param);
-        this.curseur.setVisible(true);
+        this.curseur.setVisible(false);
         this.handState = HandState.OPEN;
 
         help = new Help(windowSizeWidth, windowSizeHeight);
@@ -234,7 +234,7 @@ public class Controller extends Application {
     
     
     public void loadBackground(){
-        this.background = new ImageView(new Image("Images/fonds/ciel4.jpg"));
+        this.background = new ImageView(new Image("Images/fonds/ciel2.jpg"));
         
         this.root.getChildren().add(background);
         double dw = windowSizeWidth/background.getImage().getWidth();
@@ -451,13 +451,16 @@ public class Controller extends Application {
                         break;
                     case MENU:
                         //move(x, y, z);
+                        curseur.changeColorDepth(z);
                         break;
                     case CHANGE_SIZE:
                         //move(x, y, z);
+                        curseur.changeColorDepth(z);
                         changeSize(z);
                         break;
                     case CHANGE_OPACITY:
                         //move(x, y, z);
+                        curseur.changeColorDepth(z);
                         changeOpacity(z);
                         break;
                     case ON_CREATOR:
@@ -651,272 +654,7 @@ public class Controller extends Application {
         });
     }
 
-    /////////////////////////////////////////////////////////
-    /*
-     * public void handClosed() {
-     *
-     * Platform.runLater(new Runnable() {
-     *
-     * @Override public void run() { switch (state) { case SUPER_FREE:
-     *
-     * break; case CHANGE_OPACITY:
-     *
-     * //interdit break; case CHANGE_SIZE: // interdit break;
-     *
-     * case FREE: switch (handState) { case CLOSE: break; case FINGER: break;
-     * case OPEN: break; }
-     *
-     * help.illuminateOptions();
-     *
-     * if (illuminateIndex >= 0 && circleObjectArray.size() > 0) {
-     *
-     * circleObjectArray.get(illuminateIndex).select(); basket.makeItEmpty();
-     * state = States.SUN_SELECTED; help.illuminateOptions(Help.Etats.HAND_OPEN,
-     * Help.Etats.FINGER);
-     *
-     * } else if (illuminateIndex == -1) { circleObjectArray.add(new
-     * CircleObject(kinectPosX, kinectPosY, cercles, param)); //attention au
-     * changment de coordonnée
-     *
-     * illuminateIndex = circleObjectArray.size() - 1;
-     * circleObjectArray.get(illuminateIndex).toIlluminate();
-     * circleObjectArray.get(illuminateIndex).select(); basket.sunCaught();
-     * state = States.SUN_SELECTED; help.illuminateOptions(Help.Etats.HAND_OPEN,
-     * Help.Etats.FINGER);
-     *
-     * }
-     * break;
-     *
-     * case SUN_SELECTED: // impossible
-     *
-     * break; case MENU: help.illuminateOptions(Help.Etats.FINGER,
-     * Help.Etats.HAND_OPEN); switch (tmenu.selected()) {
-     *
-     * case OPACITY: distanceZkinect = kinectPosZ; limitBack = kinectPosZ +
-     * segmentSizeOpacity / 2; limitFront = kinectPosZ - segmentSizeOpacity / 2;
-     * circleObjectArray.get(illuminateIndex).displayPipeOpacity(true); state =
-     * States.CHANGE_OPACITY; break; case SIZE: distance2handsKinect =
-     * kinectPosZ; //valeur magique paramétrable limitLeft = kinectPosZ -
-     * segmentSizeResize / 2; limitRight = kinectPosZ + segmentSizeResize / 2;
-     * circleObjectArray.get(illuminateIndex).displayPipeSize(true); state =
-     * States.CHANGE_SIZE; break; case CANCEL: state = States.SUN_SELECTED;
-     * break; } menu.getChildren().removeAll(menu.getChildren()); break; } } });
-     * }
-     *
-     * public void handOpened() { curseur.changeToHandOpen();
-     * Platform.runLater(new Runnable() {
-     *
-     * @Override public void run() { switch (state) { case SUPER_FREE:
-     *
-     * break; case CHANGE_OPACITY: state = States.FREE;
-     * help.illuminateOptions(Help.Etats.HAND_CLOSE);
-     * circleObjectArray.get(illuminateIndex).unSelect();
-     * circleObjectArray.get(illuminateIndex).displayPipeSize(false);
-     * circleObjectArray.get(illuminateIndex).displayPipeOpacity(false); break;
-     * case CHANGE_SIZE: help.illuminateOptions(Help.Etats.HAND_CLOSE); state =
-     * States.FREE; circleObjectArray.get(illuminateIndex).unSelect();
-     * circleObjectArray.get(illuminateIndex).displayPipeSize(false);
-     * circleObjectArray.get(illuminateIndex).displayPipeOpacity(false); break;
-     *
-     * case FREE: // Interdit break;
-     *
-     * case SUN_SELECTED: circleObjectArray.get(illuminateIndex).unSelect();
-     *
-     * if (basket.proximity(circleObjectArray.get(illuminateIndex).getX(),
-     * circleObjectArray.get(illuminateIndex).getY())) { basket.sunDroped();
-     * cercles.getChildren().remove(illuminateIndex);
-     * circleObjectArray.remove(illuminateIndex); illuminateIndex = -2;
-     * help.illuminateOptions(Help.Etats.HAND_CLOSE);
-     *
-     * } else { help.illuminateOptions(Help.Etats.HAND_CLOSE);
-     *
-     * basket.makeItFull(); } state = States.FREE; break; case MENU:
-     * help.illuminateOptions(Help.Etats.HAND_CLOSE); state = States.FREE;
-     * circleObjectArray.get(illuminateIndex).unSelect();
-     * menu.getChildren().removeAll(menu.getChildren()); break;
-     *
-     * }
-     * }
-     * });
-     *
-     *
-     * }
-     *
-     * public void handMove(final double x, final double y, final double z) {
-     * //System.out.println(etat); Platform.runLater(new Runnable() {
-     *
-     * @Override public void run() {
-     *
-     * switch (state) { case SUPER_FREE:
-     *
-     * break; case CHANGE_OPACITY: kinectPosX = x; kinectPosY = y; kinectPosZ =
-     * z; //if (testGuardOpacity()) { // etat = Etats.SUN_SELECTED; //}
-     * changeOpacity(z); //interdit break; case CHANGE_SIZE: kinectPosX = x;
-     * kinectPosY = y; kinectPosZ = z; changeSize(z); break;
-     *
-     * case FREE: kinectPosX = x; kinectPosY = y; kinectPosZ = z; majFeedback(x,
-     * y); //attention au passage des coordonnées 640*480
-     *
-     * break;
-     *
-     * case SUN_SELECTED: if
-     * (basket.proximity(circleObjectArray.get(illuminateIndex).getX(),
-     * circleObjectArray.get(illuminateIndex).getY())) { basket.handIn();
-     *
-     * } else { basket.handOut();
-     *
-     * }
-     * //translateSunShader((x) * windowSizeX / kinectWindowSizeX, (y) *
-     * windowSizeY / kinectWindowSizeY); // attention dimension
-     * translateSunShader(x - kinectPosX, y - kinectPosY); kinectPosX = x;
-     * kinectPosY = y; kinectPosZ = z; kinectPosXOpacity = x; kinectPosXResize =
-     * x; kinectPosYOpacity = y; kinectPosYResize = y; break; case MENU:
-     * kinectPosX = x; kinectPosY = y; kinectPosZ = z;
-     *
-     * break; } curseur.setPosition(kinectPosX, kinectPosY); } });
-     *
-     * }
-     *
-     * public void twoHandsdistance(final double distance) {
-     * Platform.runLater(new Runnable() {
-     *
-     * @Override public void run() { switch (state) { case SUPER_FREE:
-     *
-     * break; case CHANGE_OPACITY: // Interdit break; case CHANGE_SIZE:
-     * changeSize(distance); break;
-     *
-     * case FREE: // Interdit break;
-     *
-     * case SUN_SELECTED:
-     *
-     * distance2handsKinect = distance; //valeur magique paramétrable limitLeft
-     * = distance - segmentSizeResize / 2; limitRight = distance +
-     * segmentSizeResize / 2; state = States.CHANGE_SIZE; // Go etat CHANGE_SIZE
-     * break; } } }); }
-     *
-     * public void pushHand() { Platform.runLater(new Runnable() {
-     *
-     * @Override public void run() { switch (state) { case SUPER_FREE: state =
-     * States.FREE; basket.show();
-     *
-     * break; case CHANGE_OPACITY:
-     *
-     *
-     * break; case CHANGE_SIZE: // Interdit break;
-     *
-     * case FREE: state = States.SUPER_FREE; basket.hide(); if (illuminateIndex
-     * >= 0) { circleObjectArray.get(illuminateIndex).toNormal(); }
-     *
-     * illuminateIndex = -2; break;
-     *
-     * case SUN_SELECTED:
-     *
-     *
-     * break; } } }); }
-     *
-     * public void userDetection(final boolean b) {
-     *
-     *
-     * Platform.runLater(new Runnable() {
-     *
-     * @Override public void run() { help.handWaveSetVisible(!b); if (b) {
-     * manConnectionTool.connected(); help.handWaveSetVisible(false);
-     * majFeedback(kinectPosX, kinectPosY); state = States.FREE;
-     * curseur.changeToHandOpen();
-     *
-     * } else { manConnectionTool.disconnected(); help.handWaveSetVisible(true);
-     * help.illuminateOptions(); curseur.setVisible(false);
-     * menu.getChildren().removeAll(menu.getChildren()); if (illuminateIndex >=
-     * 0) { circleObjectArray.get(illuminateIndex).toNormal(); } illuminateIndex
-     * = -2; state = States.SUPER_FREE; } switch (state) {
-     *
-     * case SUPER_FREE:
-     *
-     * break; case CHANGE_OPACITY:
-     *
-     *
-     * break; case CHANGE_SIZE: // Interdit break;
-     *
-     * case FREE:
-     *
-     * break;
-     *
-     * case SUN_SELECTED:
-     *
-     *
-     * break; case MENU: break;
-     *
-     * }
-     * }
-     * }); }
-     *
-     * void kinectconnection(final boolean b) { Platform.runLater(new Runnable()
-     * {
-     *
-     * @Override public void run() { help.handWaveSetVisible(b); if (b) {
-     * connectionTool.connected(); } else { connectionTool.disconnected(); } }
-     * }); }
-     *
-     * public void fingerAngle(final double d) {
-     *
-     * curseur.changeToFingerOn();
-     *
-     * Platform.runLater(new Runnable() {
-     *
-     * @Override public void run() {
-     *
-     * switch (state) { case SUPER_FREE:
-     *
-     *
-     * break; case CHANGE_OPACITY:
-     *
-     * tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
-     *
-     * tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.CANCEL,
-     * TiltMenu.Type.SIZE); tmenu.setIndicator(d);
-     * tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(),
-     * cercles.getChildren().get(illuminateIndex).getLayoutY());
-     * tmenu.setVisible(true);
-     * circleObjectArray.get(illuminateIndex).displayPipeSize(false);
-     * circleObjectArray.get(illuminateIndex).displayPipeOpacity(false); state =
-     * States.MENU; menu.getChildren().add(tmenu.getMenu()); break; case
-     * CHANGE_SIZE: tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2, 200);
-     *
-     * tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.CANCEL,
-     * TiltMenu.Type.SIZE); tmenu.setIndicator(d);
-     * tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(),
-     * cercles.getChildren().get(illuminateIndex).getLayoutY());
-     * tmenu.setVisible(true);
-     * circleObjectArray.get(illuminateIndex).displayPipeSize(false);
-     * circleObjectArray.get(illuminateIndex).displayPipeOpacity(false); state =
-     * States.MENU; menu.getChildren().add(tmenu.getMenu()); break;
-     *
-     * case FREE:
-     *
-     * break;
-     *
-     * case SUN_SELECTED: tmenu = new TiltMenu(d + Math.PI / 4, Math.PI / 2,
-     * 200);
-     *
-     * tmenu.addItem(TiltMenu.Type.OPACITY, TiltMenu.Type.CANCEL,
-     * TiltMenu.Type.SIZE); tmenu.setIndicator(d);
-     * tmenu.setPosition(cercles.getChildren().get(illuminateIndex).getLayoutX(),
-     * cercles.getChildren().get(illuminateIndex).getLayoutY());
-     * tmenu.setVisible(true); state = States.MENU;
-     * menu.getChildren().add(tmenu.getMenu());
-     * help.illuminateOptions(Help.Etats.HAND_CLOSE, Help.Etats.HAND_OPEN);
-     *
-     *
-     * break; case MENU: tmenu.setIndicator(d); break;
-     *
-     * }
-     *
-     *
-     * }
-     * });
-     *
-     * }
-     */
+   
     private void stopUser() {
         for (CircleObject c : circleObjectArray) {
             c.unSelect();

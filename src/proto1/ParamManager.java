@@ -15,12 +15,12 @@ public class ParamManager {
     double kinectWindowHeight = 480;
     
     //taille de la fenêtre en normal et plein écran
-    double windowSizeWidth = 800;
-    double windowSizeHeight = 600;
-    double windowSizeWidthFull = 1920;
-    double windowSizeHeightFull = 1200;
+    double windowSizeWidth = 900;
+    double windowSizeHeight = 700;
+    double windowSizeWidthFull = 1440;
+    double windowSizeHeightFull = 900;
     double windowBorderY = 100;
-    double windowBorderX = 100;
+    double windowBorderX = 200;
     
     // vitesse d'opacification et de resize
     double constantOpacity = 2;
