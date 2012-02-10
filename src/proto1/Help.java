@@ -20,32 +20,38 @@ import javafx.util.Duration;
  * @author jordane
  */
 public class Help {
-
+    private double proximity = 50;
     private Rectangle background;
     private ImageView img;
     private Group helpGroup,totalGroup;
-    private double position = 10;
     private ArrayList<Option> array;
     private HandWave handWave;
     private Path pathReturn;
     private Path pathGo;
     private PathTransition transition;
     private boolean isIn = false;
-    private double proximity = 50;
+    private double helpIconsPosition;
     private double offSetX = 100;
-    private double windowX;
+    private double helpHeight = 110;
+    private double yInit = 30;
+    private double xInit;
+    private double xBouton;
+    private double dX;
     
     public enum Etats {
         HAND_CLOSE, HAND_OPEN, FINGER
     }
 
     public Help(double windowX, double windowY) {
-        this.windowX = windowX;
-        array = new ArrayList<>();
+        this.dX = windowX - 2*offSetX;
+        this.xInit = -windowX + offSetX;
+        this.xBouton = windowX - offSetX/2;
+        this.helpIconsPosition = offSetX + 10;
+        
+        this.array = new ArrayList<>();
         this.helpGroup = new Group();
         this.totalGroup = new Group();
-        this.background = new Rectangle(windowX, 100, Color.web("#000000", 0.4));
-        this.background.setX(offSetX-windowX);
+        this.background = new Rectangle(windowX, helpHeight, Color.web("#000000", 0.4));
         this.handWave = new HandWave(windowX/2, windowY/2);
         
         this.background.setArcHeight(20);
@@ -56,24 +62,22 @@ public class Help {
         helpGroup.setVisible(false);
         handWaveSetVisible(false);
         
-        position = -windowX+220;
-        
         this.img = new ImageView(new Image("Images/help/Help.png"));
 
         //on place l'image en son centre'
-        this.img.setX(-img.getImage().getWidth() / 2 + 60);
-        this.img.setY(-img.getImage().getHeight() / 2 + 50);
+        this.img.setX(-img.getImage().getWidth() / 2 + xBouton);
+        this.img.setY(-img.getImage().getHeight() / 2 + helpHeight/2);
 
         helpGroup.getChildren().addAll(img);
         
         pathGo = new Path();
-        pathGo.getElements().add(new MoveTo(-windowX/2+offSetX, 50));
-        pathGo.getElements().add(new LineTo(windowX/2-offSetX, 50));
+        pathGo.getElements().add(new MoveTo(windowX/2, helpHeight/2));
+        pathGo.getElements().add(new LineTo(windowX/2 + dX, helpHeight/2));
         pathGo.setVisible(false);
 
         pathReturn = new Path();
-        pathReturn.getElements().add(new MoveTo(windowX/2-offSetX, 50));
-        pathReturn.getElements().add(new LineTo(-windowX/2+offSetX, 50));
+        pathReturn.getElements().add(new MoveTo(windowX/2 + dX, helpHeight/2));
+        pathReturn.getElements().add(new LineTo(windowX/2, helpHeight/2));
         pathReturn.setVisible(false);
         
         transition = new PathTransition();
@@ -81,7 +85,8 @@ public class Help {
         transition.setNode(helpGroup);
         transition.setDuration(Duration.millis(1000));
         
-        helpGroup.setLayoutY(50);
+        helpGroup.setLayoutY(yInit);
+        helpGroup.setLayoutX(xInit);
     }
     
     public void handWaveSetVisible(boolean b){
@@ -109,8 +114,8 @@ public class Help {
         } else {
             this.img = new ImageView(new Image("Images/help/Help.png"));
         }
-        this.img.setX(-img.getImage().getWidth() / 2 + 60);
-        this.img.setY(-img.getImage().getHeight() / 2 + 50);
+        this.img.setX(-img.getImage().getWidth() / 2 + xBouton);
+        this.img.setY(-img.getImage().getHeight() / 2 + helpHeight/2);
         helpGroup.getChildren().addAll(img);
     }
     
@@ -147,10 +152,10 @@ public class Help {
     }
     
     public boolean proximity(double x, double y) {
-        return (x > helpGroup.getLayoutX() + (isIn ? windowX - offSetX : 0) - img.getImage().getWidth() / 2 - proximity
-                && x < helpGroup.getLayoutX() + (isIn ? windowX - offSetX : 0) + img.getImage().getWidth() / 2 + proximity
-                && y < helpGroup.getLayoutY() + img.getImage().getHeight() / 2 + proximity
-                && y > helpGroup.getLayoutY() - img.getImage().getHeight() / 2 - proximity);
+        return (x > helpGroup.getLayoutX() + xBouton + (isIn ? dX : 0) - img.getImage().getWidth() / 2 - proximity
+                && x < helpGroup.getLayoutX() + xBouton + (isIn ? dX : 0) + img.getImage().getWidth() / 2 + proximity
+                && y < helpGroup.getLayoutY() + img.getImage().getHeight() / 2 + proximity + helpHeight/2
+                && y > helpGroup.getLayoutY() - img.getImage().getHeight() / 2 - proximity + helpHeight/2);
     }
 
     private class Option {
@@ -160,8 +165,9 @@ public class Help {
         public Option(String s, Etats e) {
             img = new ImageView(new Image(s));
             this.etat = e;
-            img.setX(position);
-            position += img.getImage().getWidth() + 10;
+            img.setX(helpIconsPosition);
+            img.setY(-img.getImage().getHeight()/2 + helpHeight/2);
+            helpIconsPosition += img.getImage().getWidth() + 10;
             helpGroup.getChildren().add(img);
         }
 
