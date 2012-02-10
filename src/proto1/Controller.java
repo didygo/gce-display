@@ -92,13 +92,9 @@ public class Controller extends Application {
             this.windowSizeWidth = param.windowSizeWidth;
             this.windowSizeHeight = param.windowSizeHeight;
         }
-
-
-
     }
 
     public enum States {
-
         SUPER_FREE, FREE, ON_SUN, SUN_SELECTED, CHANGE_SIZE, CHANGE_OPACITY, MENU, ON_CREATOR, ON_DESTRUCTOR
     }
     private States state;
@@ -154,10 +150,8 @@ public class Controller extends Application {
         });
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-
             @Override
             public void handle(final KeyEvent arg0) {
-
                 if (arg0.getCode() == KeyCode.F) {
                     kinectServer.send("IHM_EVENT=END_CONNECTION");
                     kinectServer.disconnect();
@@ -176,8 +170,8 @@ public class Controller extends Application {
                 }
             }
         });
+        
         timer = new Timer(param.timerDuration, new ActionListener() {
-
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 tickTimer();
@@ -479,12 +473,10 @@ public class Controller extends Application {
                         } else {
                             move(x, y, z);
                         }
-
                         curseur.setPosition(kinectPosX, kinectPosY, kinectPosZ);
                         if (!isOnDestructor) {
                             timer.stop();
                             curseur.stopTimer();
-
                             if (illuminateIndex == -3) {
                                 destructor.setVisible(false);
                                 state = States.FREE;
@@ -777,8 +769,6 @@ public class Controller extends Application {
     }
 
     private void moveSunShader(double x, double y, double z) {
-
-
         double myX = x * 1;
         double myY = y * 1;
         translateSunShader(myX - kinectPosX, myY - kinectPosY);
@@ -897,55 +887,34 @@ public class Controller extends Application {
 
     private void gestionEvenementsSouris(Scene scene) {
         kinectServer.sendToSelf(true);
-
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
-
             @Override
             public void handle(MouseEvent me) {
-
                 kinectServer.send("KINECT_HAND_OPENED=false");
-
-
             }
         });
 
         scene.setOnMouseMoved(new EventHandler<MouseEvent>() {
-
             @Override
             public void handle(MouseEvent me) {
                 // System.out.println("KINECT_POSITION SEND X=" + (int) (me.getX()*kinectWindowSizeX/windowSizeX) + " Y=" + (int) (me.getY()*kinectWindowSizeY/windowSizeY ));
-
-
                 kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z="+ (int) (me.getX() * (kinectWindowSizeWidth+300) / windowSizeWidth));
             }
         });
 
         scene.setOnMouseReleased(new EventHandler<MouseEvent>() {
-
             @Override
             public void handle(MouseEvent me) {
                 kinectServer.send("KINECT_HAND_OPENED=true");
-
             }
         });
 
         scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
-
             @Override
             public void handle(MouseEvent me) {
-
                 kinectServer.send("KINECT_POSITION X=" + (int) (me.getX() * kinectWindowSizeWidth / windowSizeWidth) + " Y=" + (int) (me.getY() * kinectWindowSizeHeight / windowSizeHeight) + " Z="+ (int) (me.getX() * (kinectWindowSizeWidth+300) / windowSizeWidth));
             }
         });
-
-
-
-
-
-
-
-
-
     }
 
     @Override
@@ -953,6 +922,5 @@ public class Controller extends Application {
         stage = primaryStage;
         init(primaryStage);
         primaryStage.show();
-
     }
 }

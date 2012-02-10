@@ -30,7 +30,6 @@ public class Destructor {
         
         totalGroup.setLayoutX(windowWidth - 60);
         totalGroup.setLayoutY(windowHeight - 180);
-
     }
 
     public void addSun() {
@@ -49,12 +48,9 @@ public class Destructor {
     }
 
     public boolean proximity(double x, double y) {
-
-
         return (x > totalGroup.getLayoutX() - img.getImage().getWidth() / 2 - proximity
                 && x < totalGroup.getLayoutX() + img.getImage().getWidth() / 2 + proximity
                 && y < totalGroup.getLayoutY() + img.getImage().getHeight() / 2 + proximity
                 && y > totalGroup.getLayoutY() - img.getImage().getHeight() / 2 - proximity);
-
     }
 }

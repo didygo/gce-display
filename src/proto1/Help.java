@@ -45,20 +45,16 @@ public class Help {
         totalGroup.getChildren().addAll(helpGroup);
         helpGroup.setVisible(false);
         handWaveSetVisible(false);
-        
-        
-        
-        
     }
     
     public void handWaveSetVisible(boolean b){
-        
         handWave.activate(b);
     }
 
     public void addImg(String s, Etats e) {
         array.add(new Option(s, e));
     }
+    
     public boolean isVisible(){
         return helpGroup.isVisible();
     }
@@ -67,7 +63,6 @@ public class Help {
         return totalGroup;
     }
 
-    
     public void helpVisible(boolean b){
         helpGroup.setVisible(b);
     }
@@ -85,7 +80,6 @@ public class Help {
     }
 
     private class Option {
-
         private ImageView img;
         private Etats etat;
 
@@ -110,8 +104,7 @@ public class Help {
         }
     }
     
-    
-    private class HandWave{
+    private class HandWave {
         private ImageView gif;
         private Rectangle background;
         private Group group;
@@ -158,7 +151,6 @@ public class Help {
             return group;
         }
                 
-        
         public void activate(boolean b){
             if (b){
                 group.setVisible(b);
@@ -169,8 +161,6 @@ public class Help {
                 tr.stop();
                 rot.stop();
             }
-            
-        }
-        
+        } 
     }
 }
