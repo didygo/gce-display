@@ -1,8 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package proto1;
+
+import java.awt.Toolkit;
 
 /**
  *
@@ -17,8 +15,8 @@ public class ParamManager {
     //taille de la fenêtre en normal et plein écran
     double windowSizeWidth = 900;
     double windowSizeHeight = 700;
-    double windowSizeWidthFull = 1440;
-    double windowSizeHeightFull = 900;
+    double windowSizeWidthFull = Toolkit.getDefaultToolkit().getScreenSize().width;
+    double windowSizeHeightFull = Toolkit.getDefaultToolkit().getScreenSize().height;
     double windowBorderY = 100;
     double windowBorderX = 200;
     
