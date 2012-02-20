@@ -7,7 +7,6 @@ import fr.dgac.ivy.IvyMessageListener;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.Timer;
 
 /**
  *
@@ -17,15 +16,15 @@ public class KinectServer  {
 
     private Ivy bus;
     private String busAdress;
-    private Controller ctrl;
+    private Control ctrl;
     private double windowHeight, windowWidth, kinectWindowSizeX, kinectWindowSizeY;
     private Date dateTemp;
     private ParamManager param;
     
 
-    public KinectServer(Controller c, String adresse, double wX, double wY, ParamManager param) {
+    public KinectServer(Control c, String adresse, double wX, double wY, ParamManager param) {
         this.param = param;
-        this.ctrl = c;
+        this.ctrl =  c;
         this.busAdress = adresse;
         this.windowWidth = wX;
         this.windowHeight = wY;

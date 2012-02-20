@@ -43,7 +43,7 @@ public class Pipe {
         pipe.setScaleX(scale);
         pipe.setScaleY(scale);
         
-        System.out.println(scale);
+
         dx = 286.6 * scale;
         dy = -225.45*scale;
         dw = -74.1*scale;

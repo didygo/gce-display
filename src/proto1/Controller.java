@@ -20,12 +20,12 @@ import javax.swing.Timer;
  *
  * @author demalejo
  */
-public class Controller extends Application {
+public class Controller extends Application implements Control  {
     //le gestionnaire des paramètres
 
     private ParamManager param;
     // le gestionnaire du logiciel
-    private Launcher launcher;
+    private DashBoard dashboard;
     //variable pour définir si l'affichage est en fullscreen
     private boolean fullScreen;
     // variables de la scène graphique
@@ -78,9 +78,9 @@ public class Controller extends Application {
     Pipe pipeSize;
     Timer timer;
 
-    public Controller(Launcher l, boolean fullScreen) {
-        this.param = new ParamManager();
-        this.launcher = l;
+    public Controller(DashBoard d, boolean fullScreen,ParamManager param) {
+        this.param = param;
+        this.dashboard = d;
         this.fullScreen = fullScreen;
         if (fullScreen) {
             this.windowSizeWidth = param.windowSizeWidthFull;
@@ -91,6 +91,7 @@ public class Controller extends Application {
         }
     }
 
+    
     public enum States {
 
         SUPER_FREE, FREE, ON_SUN, SUN_SELECTED, CHANGE_SIZE, CHANGE_OPACITY, MENU, ON_CREATOR, ON_DESTRUCTOR, ON_HELP
@@ -110,7 +111,21 @@ public class Controller extends Application {
     //////////////////////////////////////
     private void init(Stage primaryStage) {
         this.stage = primaryStage;
+        /// Initialisation de la scène graphique//
+        this.kinectWindowSizeWidth = param.kinectWindowWidth;
+        this.kinectWindowSizeHeight = param.kinectWindowHeight;
+        this.root = new Group();
+        this.scene = new Scene(root, windowSizeWidth, windowSizeHeight);
+        primaryStage.setScene(scene);
+        loadBackground();
+        manageEvents();
+        initComponentsProto();
+        
+        this.stage.setFullScreen(fullScreen);
+    }
 
+    // initilaise le bus logiciel, et les composants graphiques
+    public void initComponentsProto() {
         /// init des variables
         this.distance2handsKinect = 100;
         this.limitLeft = 90;
@@ -118,7 +133,6 @@ public class Controller extends Application {
         this.kinectPosXResize = 0;
         this.kinectPosYResize = 0;
         this.multTranslation = param.constantMultMove;
-
         // Gardes pour le resize et l'opacity
         this.distanceZkinect = 100;
         this.limitBack = 110;
@@ -126,49 +140,8 @@ public class Controller extends Application {
         this.opacityGuard = 30;
         this.kinectPosXOpacity = 0;
         this.kinectPosYOpacity = 0;
-
-        /// Initialisation de la scène graphique//
-        this.kinectWindowSizeWidth = param.kinectWindowWidth;
-        this.kinectWindowSizeHeight = param.kinectWindowHeight;
-        this.root = new Group();
-        this.scene = new Scene(root, windowSizeWidth, windowSizeHeight);
-        primaryStage.setScene(scene);
-
-        loadBackground();
-        ////////////////////////////////////////
-
-        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-
-            @Override
-            public void handle(WindowEvent arg0) {
-                kinectServer.send("IHM_EVENT=END_CONNECTION");
-                System.exit(0);
-            }
-        });
-
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-
-            @Override
-            public void handle(final KeyEvent arg0) {
-                if (arg0.getCode() == KeyCode.F) {
-                    kinectServer.send("IHM_EVENT=END_CONNECTION");
-                    kinectServer.disconnect();
-                    if (getStage().isFullScreen()) {
-                        launcher.fullScreen(false);
-                    } else {
-                        launcher.fullScreen(true);
-                    }
-                }
-                if (arg0.getCode() == KeyCode.H) {
-                    if (help.isVisible()) {
-                        help.helpVisible(false);
-                    } else {
-                        help.helpVisible(true);
-                    }
-                }
-            }
-        });
-
+        
+        // le timer utilisé par le prototype 1
         timer = new Timer(param.timerDuration, new ActionListener() {
 
             @Override
@@ -176,20 +149,14 @@ public class Controller extends Application {
                 tickTimer();
             }
         });
-
-        this.stage.setFullScreen(fullScreen);
-        initComponents();
-    }
-
-    // initilaise le bus logiciel, et les composants graphiques
-    public void initComponents() {
+        
         /// 2) Initialisation du bus de communication inter logiciel ///
         this.adresseBus = "127.255.255.255:2010";
         this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight, param);
         //////////////////////////////////////////////////////////////
         gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
-        this.state = States.FREE;
+        this.state = States.SUPER_FREE;
         this.basket = new CircleBasket(root, windowSizeWidth, windowSizeHeight, param);
 
         this.circleObjectArray = new ArrayList();
@@ -213,17 +180,20 @@ public class Controller extends Application {
         root.getChildren().addAll(help.getHelp());
         
         this.curseur = new Curseur(root, param);
-        this.curseur.setVisible(true);
+        this.curseur.setVisible(false);
         this.handState = HandState.OPEN;
         
         //primaryStage.setFullScreen(true);
 
         root.getChildren().add(new Config().getConfig());
         
-        help.helpVisible(true);
-    }
+        help.allVisible(true);
 
-    public void loadBackground() {
+    }
+    
+  
+
+    private void loadBackground() {
         this.background = new ImageView(new Image("Images/fonds/ciel2.jpg"));
 
         this.root.getChildren().add(background);
@@ -231,10 +201,48 @@ public class Controller extends Application {
         double dh = windowSizeHeight / background.getImage().getHeight();
         background.setScaleX(dw);
         background.setScaleY(dh);
-        System.out.println(background.getImage().getWidth() * (dw - 1) / 2);
+        
         background.setX(background.getImage().getWidth() * (dw - 1) / 2);
         background.setY(background.getImage().getHeight() * (dh - 1) / 2);
     }
+    
+    private void manageEvents() {
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+            @Override
+            public void handle(WindowEvent arg0) {
+                kinectServer.send("IHM_EVENT=END_CONNECTION");
+                dashboard.stopApplication();
+            }
+        });
+
+        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+
+            @Override
+            public void handle(final KeyEvent arg0) {
+                if (arg0.getCode() == KeyCode.F) {
+                    kinectServer.send("IHM_EVENT=END_CONNECTION");
+                    kinectServer.disconnect();
+                    if (getStage().isFullScreen()) {
+                        dashboard.fullScreen(false);
+                    } else {
+                        dashboard.fullScreen(true);
+                    }
+                }
+                if (arg0.getCode() == KeyCode.H) {
+                    if (help.isVisible()) {
+                        help.allVisible(false);
+                    } else {
+                        help.allVisible(true);
+                    }
+                }
+            }
+        });
+    }
+
+    
+    
+    /* ------------------------- State Machine Proto 1 ---------------------*/
 
     public void kinectconnection(final boolean b) {
         Platform.runLater(new Runnable() {
@@ -663,6 +671,9 @@ public class Controller extends Application {
             }
         });
     }
+    
+    
+   
 
     private void stopUser() {
         for (CircleObject c : circleObjectArray) {
@@ -677,6 +688,7 @@ public class Controller extends Application {
         }
         manConnectionTool.disconnected();
         help.handWaveSetVisible(true);
+        help.helpVisible(false);
         help.illuminateOptions();
         curseur.setVisible(false);
         basket.hide();
@@ -685,6 +697,7 @@ public class Controller extends Application {
     private void startUser() {
         manConnectionTool.connected();
         help.handWaveSetVisible(false);
+        help.helpVisible(true);
         curseur.setVisible(true);
         curseur.changeToHandOpen();
         basket.show();
@@ -733,7 +746,7 @@ public class Controller extends Application {
     }
 
     private void selectSunShader() {
-        help.helpVisible(false);
+        
         circleObjectArray.get(illuminateIndex).select();
         basket.makeItEmpty();
     }

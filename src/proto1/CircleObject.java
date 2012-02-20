@@ -56,6 +56,7 @@ public class CircleObject {
         this.maximumSize = param.maximumSize;
         this.sizedirection = param.sizeDirection;
         this.opacityDirection = param.opacityDirection;
+
         
         
         this.circ = new javafx.scene.shape.Circle(0, 0, size, Color.BLACK);
@@ -94,7 +95,7 @@ public class CircleObject {
     }
 
     public boolean hitTestObject(double i, double j) {
-        Circle c = new Circle(circ.getCenterX(), circ.getCenterY(), boxSize / 2);
+        Circle c = new Circle(totalGroup.getLayoutX(), totalGroup.getLayoutY(), boxSize/2.5);
         return c.contains(i, j);
     }
 
@@ -102,7 +103,7 @@ public class CircleObject {
     public void increaseDensity() {
 
         boxSize++;
-        size += 3;
+        size = param.defaultSize*boxSize/param.defaultOpacity;
         circ.setRadius(size);
         box.setHeight(boxSize);
         box.setWidth(boxSize);

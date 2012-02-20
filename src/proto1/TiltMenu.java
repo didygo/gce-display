@@ -36,7 +36,7 @@ public class TiltMenu {
     };
 
     public TiltMenu(double initialAngle, double totalAngle, double length) {
-        qArray = new ArrayList<>();
+        qArray = new ArrayList<Quarter>();
         line = new Line();
         line.setStroke(Color.GOLD);
         line.setStrokeLineCap(StrokeLineCap.ROUND);

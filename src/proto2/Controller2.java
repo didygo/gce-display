@@ -13,6 +13,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import proto1.DashBoard;
 
 
 /**
@@ -27,11 +28,23 @@ public class Controller2 extends Application {
     private double kinectPosX = 0;
     private double kinectPosY = 0;
     private Curseur cur;
-    private double windowSizeY, windowSizeX;
+    private double windowSizeHeight, windowSizeWidth;
     private String adresseBus;
     KinectServer kinectServer;
     ConnectionTool connectionTool;
     ManConnectionTool manConnectionTool;
+    private DashBoard dashboard;
+    private boolean fullScreen;
+    private ParamManager2 param;
+
+    public Controller2(DashBoard d, boolean fullScreen,ParamManager2 param) {
+        this.dashboard = d;
+        this.fullScreen = fullScreen;
+        this.param = param;
+        
+    }
+    
+    
 
     public enum Etats {
 
@@ -48,10 +61,15 @@ public class Controller2 extends Application {
     private void init(Stage primaryStage) {
 
         /// 1) Initialisation de la scène graphique//
-        windowSizeX = 1024;
-        windowSizeY = 768;
+        if (fullScreen) {
+            this.windowSizeWidth = param.windowSizeWidthFull;
+            this.windowSizeHeight = param.windowSizeHeightFull;
+        } else {
+            this.windowSizeWidth = param.windowSizeWidth;
+            this.windowSizeHeight = param.windowSizeHeight;
+        }
         root = new Group();
-        Scene scene = new Scene(root, windowSizeX, windowSizeY);
+        Scene scene = new Scene(root, windowSizeWidth, windowSizeHeight);
         ImageView background = new ImageView(new Image("Images/fonds/ciel.png"));
         //primaryStage.setResizable(false);
         primaryStage.setScene(scene);
@@ -71,8 +89,8 @@ public class Controller2 extends Application {
         activerKinectProto2();
         ////////////////////////////////////////////////////////
 
-        connectionTool = new ConnectionTool(root, windowSizeX - 50, windowSizeY - 50, kinectServer);
-        manConnectionTool = new ManConnectionTool(root, windowSizeX - 150, windowSizeY - 50, kinectServer);
+        connectionTool = new ConnectionTool(root, windowSizeWidth - 50, windowSizeHeight - 50, kinectServer);
+        manConnectionTool = new ManConnectionTool(root, windowSizeWidth - 150, windowSizeHeight - 50, kinectServer);
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 
             @Override
@@ -81,6 +99,8 @@ public class Controller2 extends Application {
                 System.exit(0);
             }
         });
+        
+        primaryStage.setFullScreen(fullScreen);
 
     }
 
@@ -210,10 +230,10 @@ public class Controller2 extends Application {
 
                         break;
                     case LIBRE:
-                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeX)) + " Y=" + (int)((me.getY() * 480 / windowSizeY)));
+                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeWidth)) + " Y=" + (int)((me.getY() * 480 / windowSizeHeight)));
                         break;
                     case REPOS:
-                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeX)) + " Y=" + (int)((me.getY() * 480 / windowSizeY)));
+                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeWidth)) + " Y=" + (int)((me.getY() * 480 / windowSizeHeight)));
                         break;
 
 
@@ -250,14 +270,14 @@ public class Controller2 extends Application {
             public void handle(MouseEvent me) {
                 switch (etat) {
                     case DESSIN:
-                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeX)) + " Y=" + (int)((me.getY() * 480 / windowSizeY)));
+                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeWidth)) + " Y=" + (int)((me.getY() * 480 / windowSizeHeight)));
 
                         break;
                     case LIBRE:
-                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeX)) + " Y=" + (int)((me.getY() * 480 / windowSizeY)));
+                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeWidth)) + " Y=" + (int)((me.getY() * 480 / windowSizeHeight)));
                         break;
                     case REPOS:
-                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeX)) + " Y=" + (int)((me.getY() * 480 / windowSizeY)));
+                        kinectServer.send("KINECT_POSITION X=" + (int)((me.getX() * 640 / windowSizeWidth)) + " Y=" + (int)((me.getY() * 480 / windowSizeHeight)));
                         break;
 
 
@@ -268,7 +288,7 @@ public class Controller2 extends Application {
     }
 
     private void repositionnerCurseurKinect() {
-        cur.setPosition(kinectPosX * windowSizeX / (double) 640, kinectPosY * windowSizeY / (double) 480);
+        cur.setPosition(kinectPosX * windowSizeWidth / (double) 640, kinectPosY * windowSizeHeight / (double) 480);
     }
 
     private void allErase() {
@@ -285,7 +305,7 @@ public class Controller2 extends Application {
     private void superpositionTestPresenceKinect() {
         boolean testPresence = false;
         for (int i = 0; i < circleObjectArray.size(); i++) {
-            if (circleObjectArray.get(i).hitTestObject(kinectPosX * windowSizeX / (double) 640, kinectPosY * windowSizeY / (double) 480)) {
+            if (circleObjectArray.get(i).hitTestObject(kinectPosX * windowSizeWidth / (double) 640, kinectPosY * windowSizeHeight / (double) 480)) {
                 testPresence = true;
 
                 circleObjectArray.get(i).increaseDensity();
@@ -293,7 +313,7 @@ public class Controller2 extends Application {
         }
         if (!testPresence) {
 
-            circleObjectArray.add(new CircleObject(kinectPosX * windowSizeX / (double) 640, kinectPosY * windowSizeY / (double) 480, cercles));
+            circleObjectArray.add(new CircleObject(kinectPosX * windowSizeWidth / (double) 640, kinectPosY * windowSizeHeight / (double) 480, cercles));
 
 
         }

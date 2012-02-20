@@ -1,35 +1,30 @@
 package proto1;
 
-import java.awt.Toolkit;
-import java.awt.event.InputEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
-import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -37,47 +32,56 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 
 /**
  *
  * @author jordane
  */
 public class DashBoard extends Application {
-    
-    private ImageView backImg,quitImg,reduceImg,selectImg;
+
+    private Control controller;
+    private Stage stage;
+    private ImageView backImg, quitImg, reduceImg, selectImg, kinectbg;
     private Rectangle SelectionRect;
     private Scene scene;
-    private Stage stage;
-    private ParamManager param;
+    private ParamManager param1, param2;
+    private Group kinectbgGroup;
     private int selectedProto = -1;
     //elements de modification
-    private Slider widthOffsetSlider,heightOffsetSlider;
+    private Slider widthOffsetSlider, heightOffsetSlider;
     private TextField widthOffsetTextField, heightOffsetTextField;
-    private TextField defaultSize,minSize,maxSize,sizeSpeed;
+    private TextField defaultSize, minSize, maxSize, sizeSpeed;
     private TextField defaultOpacity, minOpacity, maxOpacity, opacitySpeed;
+    private TextField widthWindow, heightWindow;
     private ArrayList<Node> widgetArray;
-    private MediaPlayer mediaPlayer1,mediaPlayer2;
-    private MediaView mediaView1,mediaView2;
+    private MediaPlayer mediaPlayer1, mediaPlayer2;
+    private MediaView mediaView1, mediaView2;
     private Rectangle rectSelect1, rectSelect2;
+    private Button validationButton;
+    private CheckBox checkOpacity,checkSize;
     
     //varaible pour le deplacelemetn de la fenetre
-    private double mouseX,mouseY;
-    
+    private double mouseX, mouseY;
 
     //initialisation de la scène
     private void init(Stage primaryStage) {
-        stage =primaryStage;
+        
+        stage = primaryStage;
+
+
+
         // relatif à la scène graphique window
         Group root = new Group();
-        widgetArray = new ArrayList<>();
-        scene = new Scene(root, 800,600);
-        stage.setTitle("Gesture Exploration");
+        kinectbgGroup = new Group();
+        widgetArray = new ArrayList<Node>();
+        scene = new Scene(root, 800, 600);
+        stage.setTitle("Gesture Exploration - default_pref.txt");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.UNDECORATED);
         //les paramètres
-        param= new ParamManager();
+        param1 = new ParamManager();
+        param2 = new ParamManager();
         // fond d'ecran
         quitImg = new ImageView(new Image("Images/fonds/quitImg.png"));
         quitImg.setX(780);
@@ -89,106 +93,156 @@ public class DashBoard extends Application {
         selectImg = new ImageView(new Image("Images/fonds/seletOne.png"));
         selectImg.setLayoutX(343);
         selectImg.setLayoutY(425);
-        
+
+
         // permettre le déplacement de la fenêtre 
         createMoveBar();
         createQuitReduce();
-        
+
+
         // mettre sur la scène les éléments permettant la modification (slider, buttons ...)
-        widthOffsetSlider = new Slider(0, 300, param.windowBorderX);
+        checkOpacity = new CheckBox();
+        checkOpacity.setLayoutX(575);
+        checkOpacity.setLayoutY(303);
+        widgetArray.add(checkOpacity);
+        
+        checkSize = new CheckBox();
+        checkSize.setLayoutX(565);
+        checkSize.setLayoutY(134);
+        widgetArray.add(checkSize);
+        
+        widthOffsetSlider = new Slider(0, 300, param1.windowBorderX);
         widthOffsetSlider.setLayoutX(108);
         widthOffsetSlider.setLayoutY(216);
         widthOffsetSlider.setPrefWidth(180);
         widgetArray.add(widthOffsetSlider);
         
-        heightOffsetSlider = new Slider(0, 200, param.windowBorderY);
+
+        heightOffsetSlider = new Slider(0, 200, 0);
         heightOffsetSlider.setLayoutX(108);
         heightOffsetSlider.setLayoutY(250);
         heightOffsetSlider.setPrefWidth(180);
         widgetArray.add(heightOffsetSlider);
-        
-        widthOffsetTextField = new TextField("" + (int)param.windowBorderX);
+
+        widthOffsetTextField = new TextField();
         widthOffsetTextField.setLayoutX(292);
         widthOffsetTextField.setLayoutY(213);
         widthOffsetTextField.setPrefWidth(40);
         widthOffsetTextField.setEditable(true);
         widgetArray.add(widthOffsetTextField);
+
         
-        heightOffsetTextField = new TextField("" + (int)param.windowBorderY);
+
+
+        heightOffsetTextField = new TextField();
         heightOffsetTextField.setLayoutX(292);
         heightOffsetTextField.setLayoutY(247);
         heightOffsetTextField.setPrefWidth(40);
         heightOffsetTextField.setEditable(true);
         widgetArray.add(heightOffsetTextField);
-        
-        defaultSize = new TextField(""+ (int)param.defaultSize);
+
+        defaultSize = new TextField();
         defaultSize.setLayoutX(565);
         defaultSize.setLayoutY(46);
         defaultSize.setPrefWidth(50);
         defaultSize.setEditable(true);
         widgetArray.add(defaultSize);
-        
-        minSize = new TextField(""+ (int)param.minimumSize);
+
+        minSize = new TextField();
         minSize.setLayoutX(565);
         minSize.setLayoutY(90);
         minSize.setPrefWidth(50);
         minSize.setEditable(true);
         widgetArray.add(minSize);
-        
-        maxSize = new TextField(""+ (int)param.maximumSize);
+
+        maxSize = new TextField();
         maxSize.setLayoutX(730);
         maxSize.setLayoutY(90);
         maxSize.setPrefWidth(50);
         maxSize.setEditable(true);
         widgetArray.add(maxSize);
-        
-        sizeSpeed = new TextField(""+ (int)param.constantSize);
+
+        sizeSpeed = new TextField();
         sizeSpeed.setLayoutX(730);
         sizeSpeed.setLayoutY(133);
         sizeSpeed.setPrefWidth(50);
         sizeSpeed.setEditable(true);
         widgetArray.add(sizeSpeed);
-        
-        
-        
-        defaultOpacity = new TextField(""+ (int)param.defaultOpacity);
+
+
+
+        defaultOpacity = new TextField();
         defaultOpacity.setLayoutX(575);
         defaultOpacity.setLayoutY(228);
         defaultOpacity.setPrefWidth(50);
         defaultOpacity.setEditable(true);
         widgetArray.add(defaultOpacity);
-        
-        minOpacity = new TextField(""+ (int)param.minimumOpacity);
+
+        minOpacity = new TextField();
         minOpacity.setLayoutX(575);
         minOpacity.setLayoutY(267);
         minOpacity.setPrefWidth(50);
         minOpacity.setEditable(true);
         widgetArray.add(minOpacity);
-        
-        
-        maxOpacity = new TextField(""+ (int)param.maximumOpacity);
+
+
+        maxOpacity = new TextField();
         maxOpacity.setLayoutX(745);
         maxOpacity.setLayoutY(265);
         maxOpacity.setPrefWidth(45);
         maxOpacity.setEditable(true);
         widgetArray.add(maxOpacity);
-        
-        opacitySpeed = new TextField(""+ (int)param.constantOpacity);
+
+        opacitySpeed = new TextField();
         opacitySpeed.setLayoutX(745);
         opacitySpeed.setLayoutY(303);
         opacitySpeed.setPrefWidth(45);
         opacitySpeed.setEditable(true);
         widgetArray.add(opacitySpeed);
-        
-        
-        
-        
+
+        widthWindow = new TextField();
+        widthWindow.setLayoutX(105);
+        widthWindow.setLayoutY(175);
+        widthWindow.setPrefWidth(50);
+        widthWindow.setEditable(true);
+        widgetArray.add(widthWindow);
+
+        heightWindow = new TextField();
+        heightWindow.setLayoutX(245);
+        heightWindow.setLayoutY(175);
+        heightWindow.setPrefWidth(50);
+        heightWindow.setEditable(true);
+        widgetArray.add(heightWindow);
+
+        validationButton = new Button("Start");
+        validationButton.setLayoutX(380);
+        validationButton.setLayoutY(500);
+        validationButton.setVisible(false);
+
+        kinectbg = new ImageView(new Image("Images/fonds/ciel3.jpg"));
+        kinectbgGroup.getChildren().add(kinectbg);
+        kinectbg.setLayoutX(-kinectbg.getImage().getWidth() / 2);
+        kinectbg.setLayoutY(-kinectbg.getImage().getHeight() / 2);
+        kinectbg.setScaleX(190 / kinectbg.getImage().getWidth());
+        kinectbg.setScaleY(115 / kinectbg.getImage().getHeight());
+        kinectbgGroup.setLayoutX(230);
+        kinectbgGroup.setLayoutY(329);
+
+
+
+
+
         //ajout des vidéos
         Group mediaGroup1 = new Group();
         rectSelect1 = new Rectangle(330, 190, Color.RED);
         BoxBlur box = new BoxBlur(15, 15, 15);
         rectSelect1.setEffect(box);
-        mediaPlayer1 = new MediaPlayer(new Media("http://download.oracle.com/otndocs/products/javafx/oow2010-2.flv"));
+        File dir1 = new File(".");
+        try {
+            mediaPlayer1 = new MediaPlayer(new Media("file:" + dir1.getCanonicalPath() + "/videos/protos/proto1.flv"));
+        } catch (IOException ex) {
+            Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
+        }
         mediaView1 = new MediaView(mediaPlayer1);
         mediaView1.setPreserveRatio(false);
         //mediaView1.setLayoutX(10);
@@ -199,15 +253,19 @@ public class DashBoard extends Application {
         mediaPlayer1.setMute(true);
         mediaPlayer1.setCycleCount(Timeline.INDEFINITE);
         mediaPlayer1.play();
-        mediaGroup1.getChildren().addAll(rectSelect1,new Rectangle(330, 190, Color.BLACK),mediaView1);
+        mediaGroup1.getChildren().addAll(rectSelect1, new Rectangle(330, 190, Color.BLACK), mediaView1);
         mediaGroup1.setLayoutX(10);
         mediaGroup1.setLayoutY(400);
         rectSelect1.setVisible(false);
-        
+
         Group mediaGroup2 = new Group();
         rectSelect2 = new Rectangle(330, 190, Color.RED);
         rectSelect2.setEffect(box);
-        mediaPlayer2 = new MediaPlayer(new Media("http://download.oracle.com/otndocs/products/javafx/oow2010-2.flv"));
+        try {
+            mediaPlayer2 = new MediaPlayer(new Media("file:" + dir1.getCanonicalPath() + "/videos/protos/proto2.flv"));
+        } catch (IOException ex) {
+            Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
+        }
         mediaView2 = new MediaView(mediaPlayer2);
         mediaView2.setPreserveRatio(false);
         //mediaView2.setLayoutX(460);
@@ -218,55 +276,236 @@ public class DashBoard extends Application {
         mediaPlayer2.setMute(true);
         mediaPlayer2.setCycleCount(Timeline.INDEFINITE);
         mediaPlayer2.play();
-        mediaGroup2.getChildren().addAll(rectSelect2,new Rectangle(330, 190, Color.BLACK),mediaView2);
+        mediaGroup2.getChildren().addAll(rectSelect2, new Rectangle(330, 190, Color.BLACK), mediaView2);
         mediaGroup2.setLayoutX(460);
         mediaGroup2.setLayoutY(400);
         rectSelect2.setVisible(false);
-        
+
         // comportement des widgets
         widgetBehavior();
-        
+
         // ajouter à l'affichage
-        
-        root.getChildren().addAll(backImg,SelectionRect,quitImg,reduceImg,widthOffsetSlider,heightOffsetSlider
-                ,widthOffsetTextField,heightOffsetTextField,defaultSize,minSize,maxSize,sizeSpeed,
-                defaultOpacity,minOpacity,maxOpacity,opacitySpeed,mediaGroup1,mediaGroup2,selectImg);
-        
-        
-        
 
-        
+        root.getChildren().addAll(backImg, SelectionRect, quitImg, reduceImg, widthOffsetSlider, heightOffsetSlider, widthOffsetTextField, heightOffsetTextField, defaultSize, minSize, maxSize, sizeSpeed,
+                defaultOpacity, minOpacity, maxOpacity, opacitySpeed, mediaGroup1, mediaGroup2, selectImg,
+                validationButton, widthWindow, heightWindow, kinectbgGroup,checkOpacity,checkSize);
 
+
+        for (Node n : widgetArray){
+            n.setVisible(false);
+        }
+
+
+
+
+    }
+
+    private void installParameters() {
+        if (selectedProto == 1) {
+            widthWindow.setText("" + (int) param1.windowSizeWidth);
+            heightWindow.setText("" + (int) param1.windowSizeHeight);
+            widthOffsetSlider.setValue(param1.windowBorderX);
+            heightOffsetSlider.setValue(param1.windowBorderY);
+            widthOffsetTextField.setText("" + (int) param1.windowBorderX);
+            heightOffsetTextField.setText("" + (int) param1.windowBorderY);
+            defaultSize.setText("" + (int) param1.defaultSize);
+            minSize.setText(("" + (int) param1.minimumSize));
+            maxSize.setText("" + (int) param1.maximumSize);
+            sizeSpeed.setText("" + (int) param1.constantSize);
+            defaultOpacity.setText("" + (int) param1.defaultOpacity);
+            minOpacity.setText("" + (int) param1.minimumOpacity);
+            maxOpacity.setText("" + (int) param1.maximumOpacity);
+            opacitySpeed.setText("" + (int) param1.constantOpacity);
+            if (param1.opacityDirection == 1) checkOpacity.setSelected(false);
+            if (param1.opacityDirection == -1) checkOpacity.setSelected(true);
+             if (param1.sizeDirection == 1) checkSize.setSelected(false);
+            if (param1.sizeDirection == -1) checkSize.setSelected(true);
+        } else if (selectedProto == 2) {
+            widthWindow.setText("" + (int) param2.windowSizeWidth);
+            heightWindow.setText("" + (int) param2.windowSizeHeight);
+            widthOffsetSlider.setValue(param2.windowBorderX);
+            heightOffsetSlider.setValue(param2.windowBorderY);
+            widthOffsetTextField.setText("" + (int) param2.windowBorderX);
+            heightOffsetTextField.setText("" + (int) param2.windowBorderY);
+            defaultSize.setText("" + (int) param2.defaultSize);
+            minSize.setText(("" + (int) param2.minimumSize));
+            maxSize.setText("" + (int) param2.maximumSize);
+            sizeSpeed.setText("" + (int) param2.constantSize);
+            defaultOpacity.setText("" + (int) param2.defaultOpacity);
+            minOpacity.setText("" + (int) param2.minimumOpacity);
+            maxOpacity.setText("" + (int) param2.maximumOpacity);
+            opacitySpeed.setText("" + (int) param2.constantOpacity);
+            if (param2.opacityDirection == 1) checkOpacity.setSelected(false);
+            if (param2.opacityDirection == -1) checkOpacity.setSelected(true);
+            if (param2.sizeDirection == 1) checkSize.setSelected(false);
+            if (param2.sizeDirection == -1) checkSize.setSelected(true);
+        }
+        for (Node n : widgetArray){
+            n.setVisible(true);
+        }
     }
 
     private void widgetBehavior() {
         //comportement des widgets
+        checkSize.selectedProperty().addListener(new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
+                if (selectedProto == 1) {
+                    if(arg2){
+                        param1.sizeDirection = -1;
+                    }else{
+                        param1.sizeDirection = 1;
+                    }
+                    
+                } else if (selectedProto == 2) {
+                    if(arg2){
+                        param2.sizeDirection = -1;
+                    }else{
+                        param2.sizeDirection = 1;
+                    }
+                }
+            }
+        });
+        checkOpacity.selectedProperty().addListener(new ChangeListener<Boolean>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
+                if (selectedProto == 1) {
+                    if(arg2){
+                        param1.opacityDirection = -1;
+                    }else{
+                        param1.opacityDirection = 1;
+                    }
+                    
+                } else if (selectedProto == 2) {
+                    if(arg2){
+                        param2.opacityDirection = -1;
+                    }else{
+                        param2.opacityDirection = 1;
+                    }
+                }
+            }
+        });
+        mediaView1.setOnMouseEntered(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent arg0) {
+                scene.setCursor(Cursor.HAND);
+            }
+        });
+        mediaView1.setOnMouseExited(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent arg0) {
+                scene.setCursor(Cursor.DEFAULT);
+            }
+        });
+        mediaView2.setOnMouseEntered(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent arg0) {
+                scene.setCursor(Cursor.HAND);
+            }
+        });
+        mediaView2.setOnMouseExited(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent arg0) {
+                scene.setCursor(Cursor.DEFAULT);
+            }
+        });
+        
+        widthWindow.textProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+                if (selectedProto == 1) {
+                    param1.windowSizeWidth = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.windowSizeWidth = Double.parseDouble(arg2);
+                }
+
+            }
+        });
+
+
+        heightWindow.textProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+                if (selectedProto == 1) {
+                    param1.windowSizeHeight = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.windowSizeHeight = Double.parseDouble(arg2);
+                }
+            }
+        });
+        validationButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent arg0) {
+                startApplication(false);
+            }
+        });
         widthOffsetSlider.valueProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                    widthOffsetTextField.setText("" + (int)widthOffsetSlider.getValue());
-                }
-            });
+
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                widthOffsetTextField.setText("" + (int) widthOffsetSlider.getValue());
+
+
+            }
+        });
         heightOffsetSlider.valueProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                    heightOffsetTextField.setText("" + (int)heightOffsetSlider.getValue());
+
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                heightOffsetTextField.setText("" + (int) heightOffsetSlider.getValue());
+            }
+        });
+
+        widthOffsetTextField.textProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+                if (selectedProto == 1) {
+                    param1.windowBorderX = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.windowBorderX = Double.parseDouble(arg2);
                 }
-            });
+                kinectbg.setScaleX((190 - (2 * Double.parseDouble(arg2) * 190 / kinectbg.getImage().getWidth())) / kinectbg.getImage().getWidth());
+            }
+        });
+
         widthOffsetTextField.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
             @Override
             public void handle(KeyEvent arg0) {
-               if (arg0.getCode() == KeyCode.ENTER) {
+                if (arg0.getCode() == KeyCode.ENTER) {
                     widthOffsetSlider.adjustValue(Double.parseDouble(widthOffsetTextField.getText()));
                 }
+            }
+        });
+
+        heightOffsetTextField.textProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+                if (selectedProto == 1) {
+                    param1.windowBorderY = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.windowBorderY = Double.parseDouble(arg2);
+                }
+                kinectbg.setScaleY((115 - (2 * Double.parseDouble(arg2) * 115 / kinectbg.getImage().getHeight())) / kinectbg.getImage().getHeight());
+
             }
         });
         heightOffsetTextField.setOnKeyPressed(new EventHandler<KeyEvent>() {
 
             @Override
             public void handle(KeyEvent arg0) {
-               if (arg0.getCode() == KeyCode.ENTER) {
+                if (arg0.getCode() == KeyCode.ENTER) {
                     heightOffsetSlider.adjustValue(Double.parseDouble(heightOffsetTextField.getText()));
                 }
             }
@@ -275,64 +514,88 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                
-                // à compléter
+                if (selectedProto == 1) {
+                    param1.defaultSize = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.defaultSize = Double.parseDouble(arg2);
+                }
             }
         });
         minSize.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                
-                // à compléter
+                if (selectedProto == 1) {
+                    param1.minimumSize = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.minimumSize = Double.parseDouble(arg2);
+                }
             }
         });
         maxSize.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                
-                // à compléter
+                if (selectedProto == 1) {
+                    param1.maximumSize = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.maximumSize = Double.parseDouble(arg2);
+                }
             }
         });
         sizeSpeed.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                
-                // à compléter
+                if (selectedProto == 1) {
+                    param1.constantSize = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.constantSize = Double.parseDouble(arg2);
+                }
             }
         });
         defaultOpacity.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                
-                // à compléter
+                if (selectedProto == 1) {
+                    param1.defaultOpacity = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.defaultOpacity = Double.parseDouble(arg2);
+                }
             }
         });
         minOpacity.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                
-                // à compléter
+                if (selectedProto == 1) {
+                    param1.minimumOpacity = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.minimumOpacity = Double.parseDouble(arg2);
+                }
             }
         });
         maxOpacity.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                
-                // à compléter
+                if (selectedProto == 1) {
+                    param1.maximumOpacity = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.maximumOpacity = Double.parseDouble(arg2);
+                }
             }
         });
         opacitySpeed.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                
-                // à compléter
+                if (selectedProto == 1) {
+                    param1.constantOpacity = Double.parseDouble(arg2);
+                } else if (selectedProto == 2) {
+                    param2.constantOpacity = Double.parseDouble(arg2);
+                }
             }
         });
         mediaView1.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -345,6 +608,8 @@ public class DashBoard extends Application {
                 rectSelect2.setVisible(false);
                 selectedProto = 1;
                 selectImg.setVisible(false);
+                validationButton.setVisible(true);
+                installParameters();
             }
         });
         mediaView2.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -357,9 +622,11 @@ public class DashBoard extends Application {
                 rectSelect1.setVisible(false);
                 selectedProto = 2;
                 selectImg.setVisible(false);
+                validationButton.setVisible(true);
+                installParameters();
             }
         });
-        
+
     }
 
     private void createQuitReduce() {
@@ -369,7 +636,7 @@ public class DashBoard extends Application {
             @Override
             public void handle(MouseEvent arg0) {
                 quitImg.setImage(new Image("Images/fonds/quitImg2.png"));
-                scene.setCursor(Cursor.CLOSED_HAND);
+                scene.setCursor(Cursor.HAND);
 
             }
         });
@@ -385,6 +652,7 @@ public class DashBoard extends Application {
 
             @Override
             public void handle(MouseEvent arg0) {
+
                 System.exit(0);
             }
         });
@@ -439,11 +707,59 @@ public class DashBoard extends Application {
         });
     }
 
+    public void stopApplication() {
+        try {
+            controller.getStage().close();
+            controller.stop();
+
+
+
+        } catch (Exception ex) {
+            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void startApplication(boolean full) {
+
+
+        try {
+
+            if (selectedProto == 1) {
+                controller = new Controller(this, full, param1);
+            } else if (selectedProto == 2) {
+                controller = new Proto2(this, full, param2);
+            }
+
+            stage = new Stage(StageStyle.DECORATED);
+            controller.start(stage);
+
+        } catch (Exception ex) {
+            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void fullScreen(boolean b) {
+
+        if (b) {
+            stopApplication();
+            startApplication(b);
+        } else {
+            stopApplication();
+            startApplication(b);
+        }
+
+
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         init(primaryStage);
         primaryStage.show();
 
     }
-    public static void main(String[] args) { launch(args); }
+
+    public static void main(String[] args) {
+        
+        launch(args);
+    }
 }

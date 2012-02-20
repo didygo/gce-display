@@ -1,20 +1,21 @@
-package proto1;
+package proto2;
 
+import proto1.*;
 import java.awt.Toolkit;
 
 /**
  *
  * @author jordane
  */
-public class ParamManager {
+public class ParamManager2 {
     
     //variables de la kinect
     public double kinectWindowWidth = 640;
     public double kinectWindowHeight = 480;
     
     //taille de la fenêtre en normal et plein écran
-    public double windowSizeWidth = 330*4;
-    public double windowSizeHeight = 190*4;
+    public double windowSizeWidth = 900;
+    public double windowSizeHeight = 700;
     public double windowSizeWidthFull = 1920;//Toolkit.getDefaultToolkit().getScreenSize().width;
     public double windowSizeHeightFull = 1200;//Toolkit.getDefaultToolkit().getScreenSize().height;
     public double windowBorderY = 100;
@@ -47,9 +48,7 @@ public class ParamManager {
     //paramètres pour les maxima et minima de profondeur (relatifs à l'affichage)
     public double minDepthIHM = 500;
     public double maxDepthIHM = 1000;
-    public ParamManager(){
+    public ParamManager2(){
         
     }
-    
-    
 }

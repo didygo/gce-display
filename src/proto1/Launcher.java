@@ -19,26 +19,23 @@ public class Launcher extends Application {
     private Controller c1;
     private Stage stage1;
 
-
-    
-
     private void stopApplication() {
         try {
-            
+
             c1.getStage().close();
             c1.stop();
-            
+
         } catch (Exception ex) {
             Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
-}
+        }
     }
 
-    private void startApplication( boolean full) {
-        c1 = new Controller(this,full);
+    private void startApplication(boolean full) {
+        //c1 = new Controller(this, full);
         try {
             stage1 = new Stage(StageStyle.DECORATED);
-            
-            
+
+
             c1.start(stage1);
         } catch (Exception ex) {
             Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
@@ -46,15 +43,15 @@ public class Launcher extends Application {
     }
 
     public void fullScreen(boolean b) {
-if (c1.getStage() != null){
-        if (b) {
-            stopApplication();
-            startApplication(b);
-        }else{
-            stopApplication();
-            startApplication(b);
+        if (c1.getStage() != null) {
+            if (b) {
+                stopApplication();
+                startApplication(b);
+            } else {
+                stopApplication();
+                startApplication(b);
+            }
         }
-}
 
     }
 
@@ -65,7 +62,7 @@ if (c1.getStage() != null){
     @Override
     public void start(Stage arg0) throws Exception {
         startApplication(false);
-        
+
 
     }
 }

@@ -32,6 +32,7 @@ public class Help {
     private boolean isIn = false;
     private double helpIconsPosition;
     private double offSetX = 100;
+    private double offSetXEnd = 250;
     private double helpHeight = 110;
     private double yInit = 30;
     private double xInit;
@@ -43,12 +44,12 @@ public class Help {
     }
 
     public Help(double windowX, double windowY) {
-        this.dX = windowX - 2*offSetX;
+        this.dX = windowX - offSetX - offSetXEnd;
         this.xInit = -windowX + offSetX;
         this.xBouton = windowX - offSetX/2;
-        this.helpIconsPosition = offSetX + 10;
+        this.helpIconsPosition = offSetXEnd + 10;
         
-        this.array = new ArrayList<>();
+        this.array = new ArrayList<Option>();
         this.helpGroup = new Group();
         this.totalGroup = new Group();
         this.background = new Rectangle(windowX, helpHeight, Color.web("#000000", 0.4));
@@ -57,9 +58,10 @@ public class Help {
         this.background.setArcHeight(20);
         this.background.setArcWidth(20);
         
-        helpGroup.getChildren().addAll(background,handWave.getWave());
-        totalGroup.getChildren().addAll(helpGroup);
-        helpGroup.setVisible(false);
+        helpGroup.getChildren().addAll(background);
+        totalGroup.getChildren().addAll(helpGroup,handWave.getWave());
+        helpGroup.setVisible(true);
+        totalGroup.setVisible(false);
         handWaveSetVisible(false);
         
         this.img = new ImageView(new Image("Images/help/Help.png"));
@@ -128,13 +130,17 @@ public class Help {
     }
     
     public boolean isVisible(){
-        return helpGroup.isVisible();
+        return totalGroup.isVisible();
     }
 
     public Group getHelp() {
         return totalGroup;
     }
 
+    public void allVisible(boolean b){
+        totalGroup.setVisible(b);
+    }
+    
     public void helpVisible(boolean b){
         helpGroup.setVisible(b);
     }
