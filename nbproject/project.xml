@@ -18,6 +18,7 @@
             <name>GestureDisplay</name>
             <explicit-platform explicit-source-supported="true"/>
             <source-roots>
+                <root id="src.configs.dir"/>
                 <root id="src.videos.dir"/>
                 <root id="src.Images.dir"/>
                 <root id="src.dir"/>

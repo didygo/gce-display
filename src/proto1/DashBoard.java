@@ -1,7 +1,6 @@
 package proto1;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,16 +8,13 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -30,8 +26,10 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javax.swing.JFileChooser;
 
 /**
  *
@@ -53,19 +51,22 @@ public class DashBoard extends Application {
     private TextField defaultSize, minSize, maxSize, sizeSpeed;
     private TextField defaultOpacity, minOpacity, maxOpacity, opacitySpeed;
     private TextField widthWindow, heightWindow;
+    private Button loadButton, saveButton, defaultButton;
     private ArrayList<Node> widgetArray;
     private MediaPlayer mediaPlayer1, mediaPlayer2;
     private MediaView mediaView1, mediaView2;
     private Rectangle rectSelect1, rectSelect2;
     private Button validationButton;
-    private CheckBox checkOpacity,checkSize;
-    
+    private CheckBox checkOpacity, checkSize;
+    private String curPath = "";
+    private String curFile = "";
+    private Label fileLabel;
     //varaible pour le deplacelemetn de la fenetre
     private double mouseX, mouseY;
 
     //initialisation de la scène
     private void init(Stage primaryStage) {
-        
+
         stage = primaryStage;
 
 
@@ -101,22 +102,26 @@ public class DashBoard extends Application {
 
 
         // mettre sur la scène les éléments permettant la modification (slider, buttons ...)
+        fileLabel = new Label();
+        fileLabel.setLayoutX(19);
+        fileLabel.setLayoutY(3);
+        
         checkOpacity = new CheckBox();
         checkOpacity.setLayoutX(575);
         checkOpacity.setLayoutY(303);
         widgetArray.add(checkOpacity);
-        
+
         checkSize = new CheckBox();
         checkSize.setLayoutX(565);
         checkSize.setLayoutY(134);
         widgetArray.add(checkSize);
-        
+
         widthOffsetSlider = new Slider(0, 300, param1.windowBorderX);
         widthOffsetSlider.setLayoutX(108);
         widthOffsetSlider.setLayoutY(216);
         widthOffsetSlider.setPrefWidth(180);
         widgetArray.add(widthOffsetSlider);
-        
+
 
         heightOffsetSlider = new Slider(0, 200, 0);
         heightOffsetSlider.setLayoutX(108);
@@ -131,7 +136,7 @@ public class DashBoard extends Application {
         widthOffsetTextField.setEditable(true);
         widgetArray.add(widthOffsetTextField);
 
-        
+
 
 
         heightOffsetTextField = new TextField();
@@ -205,6 +210,7 @@ public class DashBoard extends Application {
         widthWindow.setLayoutY(175);
         widthWindow.setPrefWidth(50);
         widthWindow.setEditable(true);
+
         widgetArray.add(widthWindow);
 
         heightWindow = new TextField();
@@ -228,6 +234,21 @@ public class DashBoard extends Application {
         kinectbgGroup.setLayoutX(230);
         kinectbgGroup.setLayoutY(329);
 
+        saveButton = new Button("Save");
+        saveButton.setLayoutX(360);
+        saveButton.setLayoutY(50);
+        saveButton.setPrefWidth(80);
+        saveButton.setDisable(true);
+
+        loadButton = new Button("Load");
+        loadButton.setLayoutX(360);
+        loadButton.setLayoutY(80);
+        loadButton.setPrefWidth(80);
+
+        defaultButton = new Button("Default");
+        defaultButton.setLayoutX(360);
+        defaultButton.setLayoutY(5);
+        defaultButton.setPrefWidth(80);
 
 
 
@@ -288,19 +309,17 @@ public class DashBoard extends Application {
 
         root.getChildren().addAll(backImg, SelectionRect, quitImg, reduceImg, widthOffsetSlider, heightOffsetSlider, widthOffsetTextField, heightOffsetTextField, defaultSize, minSize, maxSize, sizeSpeed,
                 defaultOpacity, minOpacity, maxOpacity, opacitySpeed, mediaGroup1, mediaGroup2, selectImg,
-                validationButton, widthWindow, heightWindow, kinectbgGroup,checkOpacity,checkSize);
+                validationButton, widthWindow, heightWindow, kinectbgGroup, checkOpacity, checkSize, saveButton, loadButton, defaultButton);
 
-
-        for (Node n : widgetArray){
+        for (Node n : widgetArray) {
             n.setVisible(false);
         }
-
-
-
+        autoload();
 
     }
 
     private void installParameters() {
+
         if (selectedProto == 1) {
             widthWindow.setText("" + (int) param1.windowSizeWidth);
             heightWindow.setText("" + (int) param1.windowSizeHeight);
@@ -316,10 +335,18 @@ public class DashBoard extends Application {
             minOpacity.setText("" + (int) param1.minimumOpacity);
             maxOpacity.setText("" + (int) param1.maximumOpacity);
             opacitySpeed.setText("" + (int) param1.constantOpacity);
-            if (param1.opacityDirection == 1) checkOpacity.setSelected(false);
-            if (param1.opacityDirection == -1) checkOpacity.setSelected(true);
-             if (param1.sizeDirection == 1) checkSize.setSelected(false);
-            if (param1.sizeDirection == -1) checkSize.setSelected(true);
+            if (param1.opacityDirection == 1) {
+                checkOpacity.setSelected(false);
+            }
+            if (param1.opacityDirection == -1) {
+                checkOpacity.setSelected(true);
+            }
+            if (param1.sizeDirection == 1) {
+                checkSize.setSelected(false);
+            }
+            if (param1.sizeDirection == -1) {
+                checkSize.setSelected(true);
+            }
         } else if (selectedProto == 2) {
             widthWindow.setText("" + (int) param2.windowSizeWidth);
             heightWindow.setText("" + (int) param2.windowSizeHeight);
@@ -335,33 +362,81 @@ public class DashBoard extends Application {
             minOpacity.setText("" + (int) param2.minimumOpacity);
             maxOpacity.setText("" + (int) param2.maximumOpacity);
             opacitySpeed.setText("" + (int) param2.constantOpacity);
-            if (param2.opacityDirection == 1) checkOpacity.setSelected(false);
-            if (param2.opacityDirection == -1) checkOpacity.setSelected(true);
-            if (param2.sizeDirection == 1) checkSize.setSelected(false);
-            if (param2.sizeDirection == -1) checkSize.setSelected(true);
+            if (param2.opacityDirection == 1) {
+                checkOpacity.setSelected(false);
+            }
+            if (param2.opacityDirection == -1) {
+                checkOpacity.setSelected(true);
+            }
+            if (param2.sizeDirection == 1) {
+                checkSize.setSelected(false);
+            }
+            if (param2.sizeDirection == -1) {
+                checkSize.setSelected(true);
+            }
         }
-        for (Node n : widgetArray){
+        for (Node n : widgetArray) {
             n.setVisible(true);
         }
     }
 
     private void widgetBehavior() {
         //comportement des widgets
+        loadButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent arg0) {
+                File f;
+                FileChooser chooser = new FileChooser();
+                chooser.setTitle("Charger ");
+                chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+                System.out.println(curPath);
+                if (!curPath.equals("")) {
+                    chooser.setInitialDirectory(new File(curPath));
+                }
+                f = chooser.showOpenDialog(stage.getOwner());
+                loadConfiguration(f);
+                if (f != null) {
+                    autosave(f.getAbsolutePath(), f.getName());
+                }
+
+            }
+        });
+
+        saveButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent arg0) {
+                saveConfiguration();
+            }
+        });
+
+        defaultButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+            @Override
+            public void handle(MouseEvent arg0) {
+                param1 = new ParamManager();
+                param2 = new ParamManager();
+                installParameters();
+            }
+        });
+
+
         checkSize.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
             @Override
             public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
                 if (selectedProto == 1) {
-                    if(arg2){
+                    if (arg2) {
                         param1.sizeDirection = -1;
-                    }else{
+                    } else {
                         param1.sizeDirection = 1;
                     }
-                    
+
                 } else if (selectedProto == 2) {
-                    if(arg2){
+                    if (arg2) {
                         param2.sizeDirection = -1;
-                    }else{
+                    } else {
                         param2.sizeDirection = 1;
                     }
                 }
@@ -372,16 +447,16 @@ public class DashBoard extends Application {
             @Override
             public void changed(ObservableValue<? extends Boolean> arg0, Boolean arg1, Boolean arg2) {
                 if (selectedProto == 1) {
-                    if(arg2){
+                    if (arg2) {
                         param1.opacityDirection = -1;
-                    }else{
+                    } else {
                         param1.opacityDirection = 1;
                     }
-                    
+
                 } else if (selectedProto == 2) {
-                    if(arg2){
+                    if (arg2) {
                         param2.opacityDirection = -1;
-                    }else{
+                    } else {
                         param2.opacityDirection = 1;
                     }
                 }
@@ -415,29 +490,41 @@ public class DashBoard extends Application {
                 scene.setCursor(Cursor.DEFAULT);
             }
         });
-        
+
         widthWindow.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.windowSizeWidth = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.windowSizeWidth = Double.parseDouble(arg2);
+                try {
+                    if (selectedProto == 1) {
+                        param1.windowSizeWidth = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.windowSizeWidth = Double.parseDouble(arg2);
+                    }
+                    widthWindow.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    widthWindow.setStyle("-fx-background-color: #E80303");
                 }
 
             }
         });
 
 
+
+
         heightWindow.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.windowSizeHeight = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.windowSizeHeight = Double.parseDouble(arg2);
+                try {
+                    if (selectedProto == 1) {
+                        param1.windowSizeHeight = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.windowSizeHeight = Double.parseDouble(arg2);
+                    }
+                    heightWindow.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    heightWindow.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -469,55 +556,58 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.windowBorderX = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.windowBorderX = Double.parseDouble(arg2);
-                }
-                kinectbg.setScaleX((190 - (2 * Double.parseDouble(arg2) * 190 / kinectbg.getImage().getWidth())) / kinectbg.getImage().getWidth());
-            }
-        });
-
-        widthOffsetTextField.setOnKeyPressed(new EventHandler<KeyEvent>() {
-
-            @Override
-            public void handle(KeyEvent arg0) {
-                if (arg0.getCode() == KeyCode.ENTER) {
+                try {
+                    if (selectedProto == 1) {
+                        param1.windowBorderX = Double.parseDouble(widthOffsetTextField.getText());
+                    } else if (selectedProto == 2) {
+                        param2.windowBorderX = Double.parseDouble(widthOffsetTextField.getText());
+                    }
+                    kinectbg.setScaleX((190 - (2 * Double.parseDouble(widthOffsetTextField.getText()) * 190 / kinectbg.getImage().getWidth())) / kinectbg.getImage().getWidth());
+                    widthOffsetTextField.setStyle("-fx-background-color: #ffffff");
                     widthOffsetSlider.adjustValue(Double.parseDouble(widthOffsetTextField.getText()));
+                } catch (Exception e) {
+                    widthOffsetTextField.setStyle("-fx-background-color: #E80303");
                 }
+
             }
         });
+
+     
 
         heightOffsetTextField.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+                try{
                 if (selectedProto == 1) {
                     param1.windowBorderY = Double.parseDouble(arg2);
                 } else if (selectedProto == 2) {
                     param2.windowBorderY = Double.parseDouble(arg2);
                 }
                 kinectbg.setScaleY((115 - (2 * Double.parseDouble(arg2) * 115 / kinectbg.getImage().getHeight())) / kinectbg.getImage().getHeight());
-
-            }
-        });
-        heightOffsetTextField.setOnKeyPressed(new EventHandler<KeyEvent>() {
-
-            @Override
-            public void handle(KeyEvent arg0) {
-                if (arg0.getCode() == KeyCode.ENTER) {
-                    heightOffsetSlider.adjustValue(Double.parseDouble(heightOffsetTextField.getText()));
+                heightOffsetSlider.adjustValue(Double.parseDouble(arg2));
+                widthOffsetTextField.setStyle("-fx-background-color: #ffffff");
+                   
+                } catch (Exception e) {
+                    widthOffsetTextField.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
+        
         defaultSize.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.defaultSize = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.defaultSize = Double.parseDouble(arg2);
+
+                try {
+                    if (selectedProto == 1) {
+                        param1.defaultSize = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.defaultSize = Double.parseDouble(arg2);
+                    }
+                    defaultSize.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    defaultSize.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -525,10 +615,15 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.minimumSize = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.minimumSize = Double.parseDouble(arg2);
+                try {
+                    if (selectedProto == 1) {
+                        param1.minimumSize = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.minimumSize = Double.parseDouble(arg2);
+                    }
+                    minSize.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    minSize.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -536,10 +631,15 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.maximumSize = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.maximumSize = Double.parseDouble(arg2);
+                try {
+                    if (selectedProto == 1) {
+                        param1.maximumSize = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.maximumSize = Double.parseDouble(arg2);
+                    }
+                    maxSize.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    maxSize.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -547,10 +647,15 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.constantSize = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.constantSize = Double.parseDouble(arg2);
+                try {
+                    if (selectedProto == 1) {
+                        param1.constantSize = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.constantSize = Double.parseDouble(arg2);
+                    }
+                    sizeSpeed.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    sizeSpeed.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -558,10 +663,15 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.defaultOpacity = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.defaultOpacity = Double.parseDouble(arg2);
+                try {
+                    if (selectedProto == 1) {
+                        param1.defaultOpacity = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.defaultOpacity = Double.parseDouble(arg2);
+                    }
+                    defaultOpacity.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    defaultOpacity.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -569,10 +679,16 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.minimumOpacity = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.minimumOpacity = Double.parseDouble(arg2);
+
+                try {
+                    if (selectedProto == 1) {
+                        param1.minimumOpacity = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.minimumOpacity = Double.parseDouble(arg2);
+                    }
+                    minOpacity.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    minOpacity.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -580,10 +696,15 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.maximumOpacity = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.maximumOpacity = Double.parseDouble(arg2);
+                try {
+                    if (selectedProto == 1) {
+                        param1.maximumOpacity = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.maximumOpacity = Double.parseDouble(arg2);
+                    }
+                    maxOpacity.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    maxOpacity.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -591,10 +712,15 @@ public class DashBoard extends Application {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                if (selectedProto == 1) {
-                    param1.constantOpacity = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.constantOpacity = Double.parseDouble(arg2);
+                try {
+                    if (selectedProto == 1) {
+                        param1.constantOpacity = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.constantOpacity = Double.parseDouble(arg2);
+                    }
+                    opacitySpeed.setStyle("-fx-background-color: #ffffff");
+                } catch (Exception e) {
+                    opacitySpeed.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
@@ -609,6 +735,7 @@ public class DashBoard extends Application {
                 selectedProto = 1;
                 selectImg.setVisible(false);
                 validationButton.setVisible(true);
+                saveButton.setDisable(false);
                 installParameters();
             }
         });
@@ -623,6 +750,7 @@ public class DashBoard extends Application {
                 selectedProto = 2;
                 selectImg.setVisible(false);
                 validationButton.setVisible(true);
+                saveButton.setDisable(false);
                 installParameters();
             }
         });
@@ -707,6 +835,235 @@ public class DashBoard extends Application {
         });
     }
 
+    public void loadConfiguration(File nomFichier) {
+        if (nomFichier != null) {
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(nomFichier)));
+                int numProto = Integer.parseInt(reader.readLine());
+
+                if (numProto == 1) {
+                    param1.windowSizeWidth = Double.parseDouble(reader.readLine());
+                    param1.windowSizeHeight = Double.parseDouble(reader.readLine());
+                    param1.windowBorderX = Double.parseDouble(reader.readLine());
+                    param1.windowBorderY = Double.parseDouble(reader.readLine());
+                    param1.defaultSize = Double.parseDouble(reader.readLine());
+                    param1.minimumSize = Double.parseDouble(reader.readLine());
+                    param1.maximumSize = Double.parseDouble(reader.readLine());
+                    param1.sizeDirection = Integer.parseInt(reader.readLine());
+                    param1.constantSize = Double.parseDouble(reader.readLine());
+                    param1.defaultOpacity = Double.parseDouble(reader.readLine());
+                    param1.minimumOpacity = Double.parseDouble(reader.readLine());
+                    param1.maximumOpacity = Double.parseDouble(reader.readLine());
+                    param1.opacityDirection = Integer.parseInt(reader.readLine());
+                    param1.constantOpacity = Double.parseDouble(reader.readLine());
+
+                    //mise à jour de l'ihm
+                    mediaView1.setOpacity(1);
+                    mediaView2.setOpacity(0.4);
+                    rectSelect1.setVisible(true);
+                    rectSelect2.setVisible(false);
+                    selectedProto = 1;
+                    selectImg.setVisible(false);
+                    validationButton.setVisible(true);
+                    installParameters();
+                } else {
+                    param2.windowSizeWidth = Double.parseDouble(reader.readLine());
+                    param2.windowSizeHeight = Double.parseDouble(reader.readLine());
+                    param2.windowBorderX = Double.parseDouble(reader.readLine());
+                    param2.windowBorderY = Double.parseDouble(reader.readLine());
+                    param2.defaultSize = Double.parseDouble(reader.readLine());
+                    param2.minimumSize = Double.parseDouble(reader.readLine());
+                    param2.maximumSize = Double.parseDouble(reader.readLine());
+                    param2.sizeDirection = Integer.parseInt(reader.readLine());
+                    param2.constantSize = Double.parseDouble(reader.readLine());
+                    param2.defaultOpacity = Double.parseDouble(reader.readLine());
+                    param2.minimumOpacity = Double.parseDouble(reader.readLine());
+                    param2.maximumOpacity = Double.parseDouble(reader.readLine());
+                    param2.opacityDirection = Integer.parseInt(reader.readLine());
+                    param2.constantOpacity = Double.parseDouble(reader.readLine());
+
+                    // mise à jour de l'ihm
+                    mediaView2.setOpacity(1);
+                    mediaView1.setOpacity(0.4);
+                    rectSelect2.setVisible(true);
+                    rectSelect1.setVisible(false);
+                    selectedProto = 2;
+                    selectImg.setVisible(false);
+                    validationButton.setVisible(true);
+                    installParameters();
+                }
+
+
+                reader.close();
+
+
+
+            } catch (FileNotFoundException e) {
+                System.out.println(e.getMessage());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    private void autosave(String path, String fileName) {
+        File f;
+
+        f = new File("configs/autosave.txt");
+
+        if (f.exists()) {
+            f.delete();
+            try {
+                f.createNewFile();
+            } catch (IOException ex) {
+                Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        try {
+            f.createNewFile();
+            FileWriter fw = new FileWriter(f, true);
+            BufferedWriter output = new BufferedWriter(fw);
+            output.write(path + "\r\n");
+            output.write(fileName + "\r\n");
+            output.flush();
+            output.close();
+        } catch (IOException ex) {
+            Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+    }
+
+    private void autoload() {
+        File f;
+
+        f = new File("configs/autosave.txt");
+        if (f.exists()) {
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream("configs/autosave.txt")));
+
+                curPath = reader.readLine();
+                curFile = curPath +"/"+reader.readLine();
+                System.out.println(curFile);
+                reader.close();
+                reader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(curFile)));
+                int numProto = Integer.parseInt(reader.readLine());
+
+                if (numProto == 1) {
+                    param1.windowSizeWidth = Double.parseDouble(reader.readLine());
+                    param1.windowSizeHeight = Double.parseDouble(reader.readLine());
+                    param1.windowBorderX = Double.parseDouble(reader.readLine());
+                    param1.windowBorderY = Double.parseDouble(reader.readLine());
+                    param1.defaultSize = Double.parseDouble(reader.readLine());
+                    param1.minimumSize = Double.parseDouble(reader.readLine());
+                    param1.maximumSize = Double.parseDouble(reader.readLine());
+                    param1.sizeDirection = Integer.parseInt(reader.readLine());
+                    param1.constantSize = Double.parseDouble(reader.readLine());
+                    param1.defaultOpacity = Double.parseDouble(reader.readLine());
+                    param1.minimumOpacity = Double.parseDouble(reader.readLine());
+                    param1.maximumOpacity = Double.parseDouble(reader.readLine());
+                    param1.opacityDirection = Integer.parseInt(reader.readLine());
+                    param1.constantOpacity = Double.parseDouble(reader.readLine());
+
+                } else {
+                    param2.windowSizeWidth = Double.parseDouble(reader.readLine());
+                    param2.windowSizeHeight = Double.parseDouble(reader.readLine());
+                    param2.windowBorderX = Double.parseDouble(reader.readLine());
+                    param2.windowBorderY = Double.parseDouble(reader.readLine());
+                    param2.defaultSize = Double.parseDouble(reader.readLine());
+                    param2.minimumSize = Double.parseDouble(reader.readLine());
+                    param2.maximumSize = Double.parseDouble(reader.readLine());
+                    param2.sizeDirection = Integer.parseInt(reader.readLine());
+                    param2.constantSize = Double.parseDouble(reader.readLine());
+                    param2.defaultOpacity = Double.parseDouble(reader.readLine());
+                    param2.minimumOpacity = Double.parseDouble(reader.readLine());
+                    param2.maximumOpacity = Double.parseDouble(reader.readLine());
+                    param2.opacityDirection = Integer.parseInt(reader.readLine());
+                    param2.constantOpacity = Double.parseDouble(reader.readLine());
+                }
+                
+
+            } catch (FileNotFoundException e) {
+                System.out.println(e.getMessage());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public void saveConfiguration() {
+        File f;
+        int choix = 0;
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Sauvegarder ");
+        chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+        System.out.println(System.getProperty("user.dir"));
+        if (!curPath.equals("")) {
+            System.out.println(curPath);
+            chooser.setInitialDirectory(new File(curPath));
+        }
+        f = chooser.showSaveDialog(stage.getOwner());
+        if (f != null) {
+            curPath = f.getAbsolutePath();
+            if (f.exists()) {
+                f.delete();
+            }
+            try {
+                FileWriter fw = new FileWriter(f, true);
+                BufferedWriter output = new BufferedWriter(fw);
+                output.write(selectedProto + "\r\n");
+                if (selectedProto == 1) {
+                    output.write(param1.windowSizeWidth + "\r\n");
+                    output.write(param1.windowSizeHeight + "\r\n");
+                    output.write(param1.windowBorderX + "\r\n");
+                    output.write(param1.windowBorderY + "\r\n");
+                    output.write(param1.defaultSize + "\r\n");
+                    output.write(param1.minimumSize + "\r\n");
+                    output.write(param1.maximumSize + "\r\n");
+                    output.write(param1.sizeDirection + "\r\n");
+                    output.write(param1.constantSize + "\r\n");
+                    output.write(param1.defaultOpacity + "\r\n");
+                    output.write(param1.minimumOpacity + "\r\n");
+                    output.write(param1.maximumOpacity + "\r\n");
+                    output.write(param1.opacityDirection + "\r\n");
+                    output.write(param1.constantOpacity + "\r\n");
+                } else {
+                    output.write(param2.windowSizeWidth + "\r\n");
+                    output.write(param2.windowSizeHeight + "\r\n");
+                    output.write(param2.windowBorderX + "\r\n");
+                    output.write(param2.windowBorderY + "\r\n");
+                    output.write(param2.defaultSize + "\r\n");
+                    output.write(param2.minimumSize + "\r\n");
+                    output.write(param2.maximumSize + "\r\n");
+                    output.write(param2.sizeDirection + "\r\n");
+                    output.write(param2.constantSize + "\r\n");
+                    output.write(param2.defaultOpacity + "\r\n");
+                    output.write(param2.minimumOpacity + "\r\n");
+                    output.write(param2.maximumOpacity + "\r\n");
+                    output.write(param2.opacityDirection + "\r\n");
+                    output.write(param2.constantOpacity + "\r\n");
+                }
+                autosave(f.getParent(), f.getName());
+                curPath = f.getParent();
+
+
+                output.flush();
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
+
+
+
+    }
+
     public void stopApplication() {
         try {
             controller.getStage().close();
@@ -759,7 +1116,7 @@ public class DashBoard extends Application {
     }
 
     public static void main(String[] args) {
-        
+
         launch(args);
     }
 }
