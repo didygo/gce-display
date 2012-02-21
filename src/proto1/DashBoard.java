@@ -1084,7 +1084,7 @@ public class DashBoard extends Application {
             if (selectedProto == 1) {
                 controller = new Controller(this, full, param1);
             } else if (selectedProto == 2) {
-                controller = new Proto2(this, full, param2);
+                controller = new Controller2(this, full, param2);
             }
 
             stage = new Stage(StageStyle.DECORATED);

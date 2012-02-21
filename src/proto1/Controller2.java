@@ -20,7 +20,7 @@ import javax.swing.Timer;
  *
  * @author demalejo
  */
-public class Proto2 extends Application implements Control {
+public class Controller2 extends Application implements Control {
     //le gestionnaire des paramètres
 
     private ParamManager param;
@@ -56,7 +56,7 @@ public class Proto2 extends Application implements Control {
     Help help;
 
 
-    public Proto2(DashBoard d, boolean fullScreen, ParamManager param) {
+    public Controller2(DashBoard d, boolean fullScreen, ParamManager param) {
         this.param = param;
         this.dashboard = d;
         this.fullScreen = fullScreen;
