@@ -42,9 +42,6 @@ public class KinectServer  {
             Logger.getLogger(KinectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         input();
-
-
-
     }
     
     public void changeWindowSize(double x, double y){

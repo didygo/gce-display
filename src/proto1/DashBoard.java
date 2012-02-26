@@ -1081,7 +1081,7 @@ public class DashBoard extends Application {
 
 
         } catch (Exception ex) {
-            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1100,7 +1100,7 @@ public class DashBoard extends Application {
             controller.start(stage);
 
         } catch (Exception ex) {
-            Logger.getLogger(Launcher.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

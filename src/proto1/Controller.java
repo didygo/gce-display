@@ -47,7 +47,7 @@ public class Controller extends Application implements Control  {
     ConnectionTool connectionTool;
     ManConnectionTool manConnectionTool;
     //panier à sunshader
-    CircleBasket basket;
+    Creator basket;
     private boolean isOnBasket = false;
     // panier qui détruit le sunshader`
     private Destructor destructor;
@@ -74,8 +74,7 @@ public class Controller extends Application implements Control  {
     Curseur curseur;
     //le menu d'aide
     Help help;
-    //le pipe pour le size
-    Pipe pipeSize;
+
     Timer timer;
 
     public Controller(DashBoard d, boolean fullScreen,ParamManager param) {
@@ -157,7 +156,7 @@ public class Controller extends Application implements Control  {
         gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
         this.state = States.SUPER_FREE;
-        this.basket = new CircleBasket(root, windowSizeWidth, windowSizeHeight, param);
+        this.basket = new Creator(root, windowSizeWidth, windowSizeHeight, param);
 
         this.circleObjectArray = new ArrayList();
         this.cercles = new Group();
@@ -185,7 +184,6 @@ public class Controller extends Application implements Control  {
         
         //primaryStage.setFullScreen(true);
 
-        root.getChildren().add(new Config().getConfig());
         
         help.allVisible(true);
 
