@@ -105,7 +105,7 @@ public class DashBoard extends Application {
         fileLabel = new Label();
         fileLabel.setLayoutX(19);
         fileLabel.setLayoutY(3);
-        
+
         checkOpacity = new CheckBox();
         checkOpacity.setLayoutX(575);
         checkOpacity.setLayoutY(303);
@@ -254,52 +254,61 @@ public class DashBoard extends Application {
 
 
         //ajout des vidéos
+
         Group mediaGroup1 = new Group();
         rectSelect1 = new Rectangle(330, 190, Color.RED);
         BoxBlur box = new BoxBlur(15, 15, 15);
         rectSelect1.setEffect(box);
         File dir1 = new File(".");
+
         try {
-            mediaPlayer1 = new MediaPlayer(new Media("file:" + dir1.getCanonicalPath() + "/videos/protos/proto1.flv"));
-        } catch (IOException ex) {
+            String pathDirectory = dir1.getCanonicalPath();
+            pathDirectory = pathDirectory.replace("\\","/");
+            
+            mediaPlayer1 = new MediaPlayer(new Media("file:///" + pathDirectory + "/videos/protos/proto1.flv"));
+            mediaView1 = new MediaView(mediaPlayer1);
+            mediaView1.setPreserveRatio(false);
+            //mediaView1.setLayoutX(10);
+            //mediaView1.setLayoutY(400);
+            mediaView1.setFitWidth(330);
+            mediaView1.setFitHeight(190);
+            mediaView1.setOpacity(0.4);
+            mediaPlayer1.setMute(true);
+            mediaPlayer1.setCycleCount(Timeline.INDEFINITE);
+            mediaPlayer1.play();
+            mediaGroup1.getChildren().addAll(rectSelect1, new Rectangle(330, 190, Color.BLACK), mediaView1);
+            mediaGroup1.setLayoutX(10);
+            mediaGroup1.setLayoutY(400);
+        } catch (Exception ex) {
             Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
         }
-        mediaView1 = new MediaView(mediaPlayer1);
-        mediaView1.setPreserveRatio(false);
-        //mediaView1.setLayoutX(10);
-        //mediaView1.setLayoutY(400);
-        mediaView1.setFitWidth(330);
-        mediaView1.setFitHeight(190);
-        mediaView1.setOpacity(0.4);
-        mediaPlayer1.setMute(true);
-        mediaPlayer1.setCycleCount(Timeline.INDEFINITE);
-        mediaPlayer1.play();
-        mediaGroup1.getChildren().addAll(rectSelect1, new Rectangle(330, 190, Color.BLACK), mediaView1);
-        mediaGroup1.setLayoutX(10);
-        mediaGroup1.setLayoutY(400);
+
         rectSelect1.setVisible(false);
 
         Group mediaGroup2 = new Group();
         rectSelect2 = new Rectangle(330, 190, Color.RED);
         rectSelect2.setEffect(box);
         try {
-            mediaPlayer2 = new MediaPlayer(new Media("file:" + dir1.getCanonicalPath() + "/videos/protos/proto2.flv"));
-        } catch (IOException ex) {
+            String pathDirectory = dir1.getCanonicalPath();
+            pathDirectory = pathDirectory.replace('\\', '/');
+            mediaPlayer2 = new MediaPlayer(new Media("file:///" + pathDirectory + "/videos/protos/proto2.flv"));
+            mediaView2 = new MediaView(mediaPlayer2);
+            mediaView2.setPreserveRatio(false);
+            //mediaView2.setLayoutX(460);
+            //mediaView2.setLayoutY(400);
+            mediaView2.setFitWidth(330);
+            mediaView2.setFitHeight(190);
+            mediaView2.setOpacity(0.4);
+            mediaPlayer2.setMute(true);
+            mediaPlayer2.setCycleCount(Timeline.INDEFINITE);
+            mediaPlayer2.play();
+            mediaGroup2.getChildren().addAll(rectSelect2, new Rectangle(330, 190, Color.BLACK), mediaView2);
+            mediaGroup2.setLayoutX(460);
+            mediaGroup2.setLayoutY(400);
+        } catch (Exception ex) {
             Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
         }
-        mediaView2 = new MediaView(mediaPlayer2);
-        mediaView2.setPreserveRatio(false);
-        //mediaView2.setLayoutX(460);
-        //mediaView2.setLayoutY(400);
-        mediaView2.setFitWidth(330);
-        mediaView2.setFitHeight(190);
-        mediaView2.setOpacity(0.4);
-        mediaPlayer2.setMute(true);
-        mediaPlayer2.setCycleCount(Timeline.INDEFINITE);
-        mediaPlayer2.play();
-        mediaGroup2.getChildren().addAll(rectSelect2, new Rectangle(330, 190, Color.BLACK), mediaView2);
-        mediaGroup2.setLayoutX(460);
-        mediaGroup2.setLayoutY(400);
+
         rectSelect2.setVisible(false);
 
         // comportement des widgets
@@ -572,28 +581,28 @@ public class DashBoard extends Application {
             }
         });
 
-     
+
 
         heightOffsetTextField.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
             public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
-                try{
-                if (selectedProto == 1) {
-                    param1.windowBorderY = Double.parseDouble(arg2);
-                } else if (selectedProto == 2) {
-                    param2.windowBorderY = Double.parseDouble(arg2);
-                }
-                kinectbg.setScaleY((115 - (2 * Double.parseDouble(arg2) * 115 / kinectbg.getImage().getHeight())) / kinectbg.getImage().getHeight());
-                heightOffsetSlider.adjustValue(Double.parseDouble(arg2));
-                widthOffsetTextField.setStyle("-fx-background-color: #ffffff");
-                   
+                try {
+                    if (selectedProto == 1) {
+                        param1.windowBorderY = Double.parseDouble(arg2);
+                    } else if (selectedProto == 2) {
+                        param2.windowBorderY = Double.parseDouble(arg2);
+                    }
+                    kinectbg.setScaleY((115 - (2 * Double.parseDouble(arg2) * 115 / kinectbg.getImage().getHeight())) / kinectbg.getImage().getHeight());
+                    heightOffsetSlider.adjustValue(Double.parseDouble(arg2));
+                    widthOffsetTextField.setStyle("-fx-background-color: #ffffff");
+
                 } catch (Exception e) {
                     widthOffsetTextField.setStyle("-fx-background-color: #E80303");
                 }
             }
         });
-        
+
         defaultSize.textProperty().addListener(new ChangeListener<String>() {
 
             @Override
@@ -945,7 +954,7 @@ public class DashBoard extends Application {
                         new FileInputStream("configs/autosave.txt")));
 
                 curPath = reader.readLine();
-                curFile = curPath +"/"+reader.readLine();
+                curFile = curPath + "/" + reader.readLine();
                 System.out.println(curFile);
                 reader.close();
                 reader = new BufferedReader(new InputStreamReader(
@@ -984,7 +993,7 @@ public class DashBoard extends Application {
                     param2.opacityDirection = Integer.parseInt(reader.readLine());
                     param2.constantOpacity = Double.parseDouble(reader.readLine());
                 }
-                
+
 
             } catch (FileNotFoundException e) {
                 System.out.println(e.getMessage());
