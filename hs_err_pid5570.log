@@ -1,0 +1,84 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=101ff0ee7, pid=5570, tid=4760297472
+#
+# JRE version: 7.0-b223
+# Java VM: OpenJDK 64-Bit Server VM (21.0-b17 mixed mode bsd-amd64 compressed oops)
+# Problematic frame:
+# V  [libjvm.dylib+0x36dee7]  Monitor::ILock(Thread*)+0x23
+#
+# Failed to write core dump. Core dumps have been disabled. To enable core dumping, try "ulimit -c unlimited" before starting Java again
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.sun.com/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread is native thread
+
+siginfo:si_signo=SIGSEGV: si_errno=0, si_code=1 (SEGV_MAPERR), si_addr=00000150
+
+Registers:
+RAX=0, RBX=0, RCX=4332042696, RDX=140668825564673
+RSP=4760296896, RBP=4760296928, RSI=0, RDI=4323389424
+R8 =160, R9 =0, R10=140668788067328, R11=4327476376
+R12=140668782028192, R13=140668781948032, R14=4323389424, R15=265
+RIP=4328460007, EFLAGS=66118, ERR=4
+  TRAPNO=14
+
+Top of Stack: (sp=11bbc5dc0)
+11bbc5dc0:   0000000000000000 0000000101b1aff0
+11bbc5dd0:   0000000000000000 0000000000000109
+11bbc5de0:   000000011bbc5e00 0000000101ff103d
+11bbc5df0:   0000000000000005 000000011bbc6000
+11bbc5e00:   000000011bbc5e10 00000001020fbcc8
+11bbc5e10:   000000011bbc5e30 0000000101f00cb7
+11bbc5e20:   000000011bbc6000 0000000000000005
+11bbc5e30:   000000011bbc5e60 000000011b9b0e0c
+11bbc5e40:   0000000101a80000 0000000000000004
+11bbc5e50:   000000011bbc68a8 00007fff7c17f6f8
+11bbc5e60:   000000011bbc5ea0 00007fff924e08cb
+11bbc5e70:   000000011bbc6060 0000000000000000
+11bbc5e80:   0000000000000000 000000011bbc6000
+11bbc5e90:   000000011bbc6000 0000000002000000
+11bbc5ea0:   000000011bbc5f10 00007fff9249bf7c
+11bbc5eb0:   00007ff000c76c80 000000011b9b0cae
+11bbc5ec0:   000000011bbc5ef0 000000011b76d79a
+11bbc5ed0:   0000206092498f80 00007ff000c76c80
+11bbc5ee0:   00007fff9249959f 000000000601001f
+11bbc5ef0:   0000000000008b0b 000000011bbc6000
+11bbc5f00:   00007ff000c76c80 000000011b9b0cae
+11bbc5f10:   000000011bbc5f50 00007fff9249a8ca
+11bbc5f20:   0000000000000000 0000000000000000
+11bbc5f30:   0000000000000000 0000000000000000
+11bbc5f40:   0000000000000000 0000000000000000
+11bbc5f50:   000000011bbc5f78 00007fff9249db75
+11bbc5f60:   0000000000000000 0000000000000000
+11bbc5f70:   0000000000000000 0000000000000000
+11bbc5f80:   0000000000000000 0000000000000000
+11bbc5f90:   0000000000000000 0000000000000000
+11bbc5fa0:   0000000000000000 0000000000000000
+11bbc5fb0:   0000000000000000 0000000000000000 
+
+Instructions: (pc=101ff0ee7)
+101ff0ec7:   e5 41 57 41 56 53 48 83 ec 08 48 89 f3 49 89 fe
+101ff0ed7:   4c 89 f7 e8 6f f8 ff ff 85 c0 0f 85 01 01 00 00
+101ff0ee7:   4c 8b bb 50 01 00 00 4c 89 f7 48 89 de e8 27 fd
+101ff0ef7:   ff ff 85 c0 0f 85 e7 00 00 00 41 c7 47 20 00 00 
+
+Register to memory mapping:
+
+RAX=0 is an unknown value
+RBX=0 is an unknown value
+RCX=10235b9c8: _ZN2os16_processor_countE+0 in /Library/Java/JavaVirtualMachines/JDK 1.7.0 Developer Preview.jdk/Contents/Home/jre/lib/server/libjvm.dylib at 101c83000
+RDX=140668825564673 is an unknown value
+RSP=4760296896 is pointing into the stack for thread: 140668795443200
+RBP=4760296928 is pointing into the stack for thread: 140668795443200
+RSI=0 is an unknown value
+RDI=4323389424 is an unknown value
+R8 =160 is an unknown value
+R9 =0 is an unknown value
+R10=140668788067328 is an unknown value
+R11=

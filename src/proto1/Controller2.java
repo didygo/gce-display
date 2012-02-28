@@ -115,7 +115,7 @@ public class Controller2 extends Application implements Control {
         this.root.getChildren().addAll(cercles, menu);
         ////////////////////////////////////////////////////////
 
-        this.connectionTool = new ConnectionTool(root, windowSizeWidth - 50, windowSizeHeight - 50, kinectServer);
+        this.connectionTool = new ConnectionTool(root, windowSizeWidth - 50, windowSizeHeight - 50, kinectServer,param);
         this.manConnectionTool = new ManConnectionTool(root, windowSizeWidth - 150, windowSizeHeight - 50, kinectServer);
 
 

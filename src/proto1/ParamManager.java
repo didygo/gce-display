@@ -47,6 +47,12 @@ public class ParamManager {
     //paramètres pour les maxima et minima de profondeur (relatifs à l'affichage)
     public double minDepthIHM = 500;
     public double maxDepthIHM = 1000;
+    
+    //paramètre kinect qui correspond au nombre de fois que l'algorithme vérifie ses calculs
+    public int constantRobustness = 1;
+    
+    // adresse du bus de communication Ivy
+    public String busAdress = "127.0.0.1:2010";
     public ParamManager(){
         
     }

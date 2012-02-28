@@ -61,6 +61,9 @@ public class DashBoard extends Application {
     private String curPath = "";
     private String curFile = "";
     private Label fileLabel;
+    private Slider robustnessSlider;
+    private TextField robustnessTextField;
+    private TextField busAdressTextField;
     //varaible pour le deplacelemetn de la fenetre
     private double mouseX, mouseY;
 
@@ -105,6 +108,8 @@ public class DashBoard extends Application {
         fileLabel = new Label();
         fileLabel.setLayoutX(19);
         fileLabel.setLayoutY(3);
+        fileLabel.setStyle("-fx-text-fill:#ffffff");
+        fileLabel.setVisible(false);
 
         checkOpacity = new CheckBox();
         checkOpacity.setLayoutX(575);
@@ -236,20 +241,42 @@ public class DashBoard extends Application {
 
         saveButton = new Button("Save");
         saveButton.setLayoutX(360);
-        saveButton.setLayoutY(50);
+        saveButton.setLayoutY(250);
         saveButton.setPrefWidth(80);
         saveButton.setDisable(true);
 
         loadButton = new Button("Load");
         loadButton.setLayoutX(360);
-        loadButton.setLayoutY(80);
+        loadButton.setLayoutY(280);
         loadButton.setPrefWidth(80);
 
         defaultButton = new Button("Default");
         defaultButton.setLayoutX(360);
-        defaultButton.setLayoutY(5);
+        defaultButton.setLayoutY(205);
         defaultButton.setPrefWidth(80);
+        defaultButton.setDisable(true);
 
+        robustnessSlider = new Slider(0, 5, 1);
+        robustnessSlider.setLayoutX(130);
+        robustnessSlider.setLayoutY(53);
+        robustnessSlider.setPrefWidth(100);
+        widgetArray.add(robustnessSlider);
+
+        robustnessTextField = new TextField();
+        robustnessTextField.setLayoutX(250);
+        robustnessTextField.setLayoutY(50);
+        robustnessTextField.setPrefWidth(20);
+        
+        robustnessTextField.setStyle("-fx-background-color: #414042; -fx-text-fill:#ffffff;");
+        //robustnessTextField.setStyle("-fx-text-fill:#00ff00");
+        widgetArray.add(robustnessTextField);
+        
+        busAdressTextField = new TextField();
+        busAdressTextField.setLayoutX(627);
+        busAdressTextField.setLayoutY(354);
+        busAdressTextField.setPrefWidth(160);
+        busAdressTextField.setVisible(true);
+        
 
 
 
@@ -263,8 +290,8 @@ public class DashBoard extends Application {
 
         try {
             String pathDirectory = dir1.getCanonicalPath();
-            pathDirectory = pathDirectory.replace("\\","/");
-            
+            pathDirectory = pathDirectory.replace("\\", "/");
+
             mediaPlayer1 = new MediaPlayer(new Media("file:///" + pathDirectory + "/videos/protos/proto1.flv"));
             mediaView1 = new MediaView(mediaPlayer1);
             mediaView1.setPreserveRatio(false);
@@ -318,7 +345,8 @@ public class DashBoard extends Application {
 
         root.getChildren().addAll(backImg, SelectionRect, quitImg, reduceImg, widthOffsetSlider, heightOffsetSlider, widthOffsetTextField, heightOffsetTextField, defaultSize, minSize, maxSize, sizeSpeed,
                 defaultOpacity, minOpacity, maxOpacity, opacitySpeed, mediaGroup1, mediaGroup2, selectImg,
-                validationButton, widthWindow, heightWindow, kinectbgGroup, checkOpacity, checkSize, saveButton, loadButton, defaultButton);
+                validationButton, widthWindow, heightWindow, kinectbgGroup, checkOpacity, checkSize, saveButton, loadButton, defaultButton, robustnessSlider, robustnessTextField,
+                busAdressTextField,fileLabel);
 
         for (Node n : widgetArray) {
             n.setVisible(false);
@@ -344,6 +372,9 @@ public class DashBoard extends Application {
             minOpacity.setText("" + (int) param1.minimumOpacity);
             maxOpacity.setText("" + (int) param1.maximumOpacity);
             opacitySpeed.setText("" + (int) param1.constantOpacity);
+            robustnessSlider.setValue(param1.constantRobustness);
+            robustnessTextField.setText("" + param1.constantRobustness);
+            busAdressTextField.setText("" + param1.busAdress);
             if (param1.opacityDirection == 1) {
                 checkOpacity.setSelected(false);
             }
@@ -371,6 +402,9 @@ public class DashBoard extends Application {
             minOpacity.setText("" + (int) param2.minimumOpacity);
             maxOpacity.setText("" + (int) param2.maximumOpacity);
             opacitySpeed.setText("" + (int) param2.constantOpacity);
+            robustnessSlider.setValue(param2.constantRobustness);
+            busAdressTextField.setText("" + param2.busAdress);
+            robustnessTextField.setText("" + param2.constantRobustness);
             if (param2.opacityDirection == 1) {
                 checkOpacity.setSelected(false);
             }
@@ -387,10 +421,35 @@ public class DashBoard extends Application {
         for (Node n : widgetArray) {
             n.setVisible(true);
         }
+        defaultButton.setDisable(false);
     }
-
+    
+//comportement des widgets
     private void widgetBehavior() {
-        //comportement des widgets
+        busAdressTextField.textProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> arg0, String arg1, String arg2) {
+                try {
+                    if (selectedProto == 1) {
+                        param1.busAdress = arg2;
+                    } else if (selectedProto == 2) {
+                        param2.busAdress = arg2;
+                    }
+                    if (arg2.contains(" ")){
+                        busAdressTextField.setStyle("-fx-background-color: #E80303");
+                    }else{
+                        busAdressTextField.setStyle("-fx-background-color: #ffffff");
+                        
+                    }
+                    
+                } catch (Exception e) {
+                    busAdressTextField.setStyle("-fx-background-color: #E80303");
+                }
+
+            }
+        });
+        
         loadButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
             @Override
@@ -544,6 +603,21 @@ public class DashBoard extends Application {
                 startApplication(false);
             }
         });
+        robustnessSlider.valueProperty().addListener(new ChangeListener<Number>() {
+
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                robustnessTextField.setText("" + newValue.intValue());
+                if (selectedProto == 1) {
+                    param1.constantRobustness = newValue.intValue();
+                } else if (selectedProto == 2) {
+                    param2.constantRobustness = newValue.intValue();
+                }
+
+
+            }
+        });
+
         widthOffsetSlider.valueProperty().addListener(new ChangeListener<Number>() {
 
             @Override
@@ -849,6 +923,7 @@ public class DashBoard extends Application {
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         new FileInputStream(nomFichier)));
+                fileLabel.setText("FICHIER DE CONF "+ nomFichier.getName());
                 int numProto = Integer.parseInt(reader.readLine());
 
                 if (numProto == 1) {
@@ -866,6 +941,8 @@ public class DashBoard extends Application {
                     param1.maximumOpacity = Double.parseDouble(reader.readLine());
                     param1.opacityDirection = Integer.parseInt(reader.readLine());
                     param1.constantOpacity = Double.parseDouble(reader.readLine());
+                    param1.constantRobustness = Integer.parseInt(reader.readLine());
+                    param1.busAdress = reader.readLine();
 
                     //mise à jour de l'ihm
                     mediaView1.setOpacity(1);
@@ -891,6 +968,8 @@ public class DashBoard extends Application {
                     param2.maximumOpacity = Double.parseDouble(reader.readLine());
                     param2.opacityDirection = Integer.parseInt(reader.readLine());
                     param2.constantOpacity = Double.parseDouble(reader.readLine());
+                    param2.constantRobustness = Integer.parseInt(reader.readLine());
+                    param2.busAdress = reader.readLine();
 
                     // mise à jour de l'ihm
                     mediaView2.setOpacity(1);
@@ -954,7 +1033,9 @@ public class DashBoard extends Application {
                         new FileInputStream("configs/autosave.txt")));
 
                 curPath = reader.readLine();
-                curFile = curPath + "/" + reader.readLine();
+                fileLabel.setText(reader.readLine());
+                curFile = curPath + "/" + fileLabel.getText();
+                fileLabel.setText("FICHIER DE CONF "+ fileLabel.getText());
                 System.out.println(curFile);
                 reader.close();
                 reader = new BufferedReader(new InputStreamReader(
@@ -976,6 +1057,8 @@ public class DashBoard extends Application {
                     param1.maximumOpacity = Double.parseDouble(reader.readLine());
                     param1.opacityDirection = Integer.parseInt(reader.readLine());
                     param1.constantOpacity = Double.parseDouble(reader.readLine());
+                    param1.constantRobustness = Integer.parseInt(reader.readLine());
+                    param1.busAdress = reader.readLine();
 
                 } else {
                     param2.windowSizeWidth = Double.parseDouble(reader.readLine());
@@ -992,6 +1075,8 @@ public class DashBoard extends Application {
                     param2.maximumOpacity = Double.parseDouble(reader.readLine());
                     param2.opacityDirection = Integer.parseInt(reader.readLine());
                     param2.constantOpacity = Double.parseDouble(reader.readLine());
+                    param2.constantRobustness = Integer.parseInt(reader.readLine());
+                    param2.busAdress = reader.readLine();
                 }
 
 
@@ -1021,6 +1106,7 @@ public class DashBoard extends Application {
                 f.delete();
             }
             try {
+                fileLabel.setText("FICHIER DE CONF "+ f.getName());
                 FileWriter fw = new FileWriter(f, true);
                 BufferedWriter output = new BufferedWriter(fw);
                 output.write(selectedProto + "\r\n");
@@ -1039,6 +1125,8 @@ public class DashBoard extends Application {
                     output.write(param1.maximumOpacity + "\r\n");
                     output.write(param1.opacityDirection + "\r\n");
                     output.write(param1.constantOpacity + "\r\n");
+                    output.write(param1.constantRobustness + "\r\n");
+                    output.write(param1.busAdress + "\r\n");
                 } else {
                     output.write(param2.windowSizeWidth + "\r\n");
                     output.write(param2.windowSizeHeight + "\r\n");
@@ -1054,6 +1142,8 @@ public class DashBoard extends Application {
                     output.write(param2.maximumOpacity + "\r\n");
                     output.write(param2.opacityDirection + "\r\n");
                     output.write(param2.constantOpacity + "\r\n");
+                    output.write(param2.constantRobustness + "\r\n");
+                    output.write(param2.busAdress + "\r\n");
                 }
                 autosave(f.getParent(), f.getName());
                 curPath = f.getParent();
@@ -1095,7 +1185,6 @@ public class DashBoard extends Application {
             } else if (selectedProto == 2) {
                 controller = new Controller2(this, full, param2);
             }
-
             stage = new Stage(StageStyle.DECORATED);
             controller.start(stage);
 

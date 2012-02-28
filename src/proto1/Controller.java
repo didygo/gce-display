@@ -42,7 +42,6 @@ public class Controller extends Application implements Control  {
     private double windowSizeHeight = 600;
     private double kinectWindowSizeWidth, kinectWindowSizeHeight;
     // bus de communication
-    private String adresseBus;
     private KinectServer kinectServer;
     ConnectionTool connectionTool;
     ManConnectionTool manConnectionTool;
@@ -150,8 +149,7 @@ public class Controller extends Application implements Control  {
         });
         
         /// 2) Initialisation du bus de communication inter logiciel ///
-        this.adresseBus = "127.255.255.255:2010";
-        this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight, param);
+        this.kinectServer = new KinectServer(this, param.busAdress, windowSizeWidth, windowSizeHeight, param);
         //////////////////////////////////////////////////////////////
         gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
@@ -164,7 +162,7 @@ public class Controller extends Application implements Control  {
         this.root.getChildren().addAll(cercles, menu);
         ////////////////////////////////////////////////////////
 
-        this.connectionTool = new ConnectionTool(root, windowSizeWidth - 50, windowSizeHeight - 50, kinectServer);
+        this.connectionTool = new ConnectionTool(root, windowSizeWidth - 50, windowSizeHeight - 50, kinectServer,param);
         this.manConnectionTool = new ManConnectionTool(root, windowSizeWidth - 150, windowSizeHeight - 50, kinectServer);
 
         destructor = new Destructor(windowSizeWidth, windowSizeHeight, param);
@@ -229,9 +227,9 @@ public class Controller extends Application implements Control  {
                 }
                 if (arg0.getCode() == KeyCode.H) {
                     if (help.isVisible()) {
-                        help.allVisible(false);
+                        help.optionalHelpVisible(false);
                     } else {
-                        help.allVisible(true);
+                        help.optionalHelpVisible(true);
                     }
                 }
             }

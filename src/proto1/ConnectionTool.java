@@ -1,4 +1,4 @@
-/*
+ /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -42,13 +42,15 @@ public class ConnectionTool {
     double amplitude;
     Group circG = new Group();
     Timer timer;
+    ParamManager param;
 
-    public ConnectionTool(Group g, double x, double y, KinectServer server) {
-        etatConnection = new ImageView(new Image("Images/connect/kinectOff.png"));
-        bus = server;
-        circleX = x;
-        circleY = y - etatConnection.getImage().getHeight() / 2 - 5;
-        amplitude = etatConnection.getImage().getHeight() + 10;
+    public ConnectionTool(Group g, double x, double y, KinectServer server,final ParamManager param) {
+        this.param = param;
+        this.etatConnection = new ImageView(new Image("Images/connect/kinectOff.png"));
+        this.bus = server;
+        this.circleX = x;
+        this.circleY = y - etatConnection.getImage().getHeight() / 2 - 5;
+        this.amplitude = etatConnection.getImage().getHeight() + 10;
         DropShadow ds = new DropShadow();
         ds.setWidth(etatConnection.getImage().getHeight() / 2 + 20);
         ds.setHeight(etatConnection.getImage().getHeight() / 2 + 20);
@@ -58,7 +60,7 @@ public class ConnectionTool {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                bus.send("IHM_EVENT=ASK_CONNECTION");
+                bus.send("IHM_EVENT=ASK_CONNECTION ROBUSTNESS="+ param.constantRobustness);
             }
         });
 

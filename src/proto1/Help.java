@@ -23,7 +23,7 @@ public class Help {
     private double proximity = 50;
     private Rectangle background;
     private ImageView img;
-    private Group helpGroup,totalGroup;
+    private Group helpGroup,totalGroup,optionalGroup;
     private ArrayList<Option> array;
     private HandWave handWave;
     private Path pathReturn;
@@ -52,6 +52,7 @@ public class Help {
         this.array = new ArrayList<Option>();
         this.helpGroup = new Group();
         this.totalGroup = new Group();
+        this.optionalGroup = new Group();
         this.background = new Rectangle(windowX, helpHeight, Color.web("#000000", 0.4));
         this.handWave = new HandWave(windowX/2, windowY/2);
         
@@ -59,7 +60,8 @@ public class Help {
         this.background.setArcWidth(20);
         
         helpGroup.getChildren().addAll(background);
-        totalGroup.getChildren().addAll(helpGroup,handWave.getWave());
+        optionalGroup.getChildren().add(handWave.getWave());
+        totalGroup.getChildren().addAll(helpGroup,optionalGroup);
         helpGroup.setVisible(true);
         totalGroup.setVisible(false);
         handWaveSetVisible(false);
@@ -93,6 +95,10 @@ public class Help {
     
     public void handWaveSetVisible(boolean b){
         handWave.activate(b);
+    }
+    
+    public void optionalHelpVisible(boolean b){
+        optionalGroup.setVisible(b);
     }
     
     public void helpIn() {
@@ -130,7 +136,7 @@ public class Help {
     }
     
     public boolean isVisible(){
-        return totalGroup.isVisible();
+        return optionalGroup.isVisible();
     }
 
     public Group getHelp() {
