@@ -724,7 +724,7 @@ public class Controller extends Application implements Control  {
         curseur.changeToFingerOn();
     }
 
-    // TODO faire les méthodes de tranistion
+    // TODO faire les méthodes de transition
     private void onSunShader() {
         destructor.setVisible(false);
         basket.makeItFull();
