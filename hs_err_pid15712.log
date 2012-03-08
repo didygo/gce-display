@@ -1,0 +1,38 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=10356dee7, pid=15712, tid=4782891008
+#
+# JRE version: 7.0-b223
+# Java VM: OpenJDK 64-Bit Server VM (21.0-b17 mixed mode bsd-amd64 compressed oops)
+# Problematic frame:
+# V  [libjvm.dylib+0x36dee7]  Monitor::ILock(Thread*)+0x23
+#
+# Failed to write core dump. Core dumps have been disabled. To enable core dumping, try "ulimit -c unlimited" before starting Java again
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.sun.com/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread is native thread
+
+siginfo:si_signo=SIGSEGV: si_errno=0, si_code=1 (SEGV_MAPERR), si_addr=00000150
+
+Registers:
+RAX=0, RBX=0, RCX=4354574792, RDX=4347135745
+RSP=4782890432, RBP=4782890464, RSI=0, RDI=140724742923808
+R8 =160, R9 =0, R10=140724756149248, R11=4350008472
+R12=140724744907680, R13=140724744831888, R14=140724742923808, R15=265
+RIP=4350992103, EFLAGS=66118, ERR=4
+  TRAPNO=14
+
+Top of Stack: (sp=11d151dc0)
+11d151dc0:   0000000000000000 00007ffd08502620
+11d151dd0:   0000000000000000 0000000000000109
+11d151de0:   000000011d151e00 000000010356e03d
+11d151df0:   0000000000000005 000000011d152000
+11d151e00:   000000011d151e10 0000000103678cc8
+11d151e10:   000000011d151e30 000000010347dcb7
+11d151e20:   000000011d152000 0000000000000005

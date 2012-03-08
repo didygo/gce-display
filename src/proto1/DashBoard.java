@@ -351,7 +351,6 @@ public class DashBoard extends Application {
         for (Node n : widgetArray) {
             n.setVisible(false);
         }
-        autoload();
 
     }
 
@@ -464,9 +463,6 @@ public class DashBoard extends Application {
                 }
                 f = chooser.showOpenDialog(stage.getOwner());
                 loadConfiguration(f);
-                if (f != null) {
-                    autosave(f.getAbsolutePath(), f.getName());
-                }
 
             }
         });
@@ -995,98 +991,9 @@ public class DashBoard extends Application {
         }
     }
 
-    private void autosave(String path, String fileName) {
-        File f;
+    
 
-        f = new File("configs/autosave.txt");
-
-        if (f.exists()) {
-            f.delete();
-            try {
-                f.createNewFile();
-            } catch (IOException ex) {
-                Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        try {
-            f.createNewFile();
-            FileWriter fw = new FileWriter(f, true);
-            BufferedWriter output = new BufferedWriter(fw);
-            output.write(path + "\r\n");
-            output.write(fileName + "\r\n");
-            output.flush();
-            output.close();
-        } catch (IOException ex) {
-            Logger.getLogger(DashBoard.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-
-    }
-
-    private void autoload() {
-        File f;
-
-        f = new File("configs/autosave.txt");
-        if (f.exists()) {
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        new FileInputStream("configs/autosave.txt")));
-
-                curPath = reader.readLine();
-                fileLabel.setText(reader.readLine());
-                curFile = curPath + "/" + fileLabel.getText();
-                fileLabel.setText("FICHIER DE CONF "+ fileLabel.getText());
-                System.out.println(curFile);
-                reader.close();
-                reader = new BufferedReader(new InputStreamReader(
-                        new FileInputStream(curFile)));
-                int numProto = Integer.parseInt(reader.readLine());
-
-                if (numProto == 1) {
-                    param1.windowSizeWidth = Double.parseDouble(reader.readLine());
-                    param1.windowSizeHeight = Double.parseDouble(reader.readLine());
-                    param1.windowBorderX = Double.parseDouble(reader.readLine());
-                    param1.windowBorderY = Double.parseDouble(reader.readLine());
-                    param1.defaultSize = Double.parseDouble(reader.readLine());
-                    param1.minimumSize = Double.parseDouble(reader.readLine());
-                    param1.maximumSize = Double.parseDouble(reader.readLine());
-                    param1.sizeDirection = Integer.parseInt(reader.readLine());
-                    param1.constantSize = Double.parseDouble(reader.readLine());
-                    param1.defaultOpacity = Double.parseDouble(reader.readLine());
-                    param1.minimumOpacity = Double.parseDouble(reader.readLine());
-                    param1.maximumOpacity = Double.parseDouble(reader.readLine());
-                    param1.opacityDirection = Integer.parseInt(reader.readLine());
-                    param1.constantOpacity = Double.parseDouble(reader.readLine());
-                    param1.constantRobustness = Integer.parseInt(reader.readLine());
-                    param1.busAdress = reader.readLine();
-
-                } else {
-                    param2.windowSizeWidth = Double.parseDouble(reader.readLine());
-                    param2.windowSizeHeight = Double.parseDouble(reader.readLine());
-                    param2.windowBorderX = Double.parseDouble(reader.readLine());
-                    param2.windowBorderY = Double.parseDouble(reader.readLine());
-                    param2.defaultSize = Double.parseDouble(reader.readLine());
-                    param2.minimumSize = Double.parseDouble(reader.readLine());
-                    param2.maximumSize = Double.parseDouble(reader.readLine());
-                    param2.sizeDirection = Integer.parseInt(reader.readLine());
-                    param2.constantSize = Double.parseDouble(reader.readLine());
-                    param2.defaultOpacity = Double.parseDouble(reader.readLine());
-                    param2.minimumOpacity = Double.parseDouble(reader.readLine());
-                    param2.maximumOpacity = Double.parseDouble(reader.readLine());
-                    param2.opacityDirection = Integer.parseInt(reader.readLine());
-                    param2.constantOpacity = Double.parseDouble(reader.readLine());
-                    param2.constantRobustness = Integer.parseInt(reader.readLine());
-                    param2.busAdress = reader.readLine();
-                }
-
-
-            } catch (FileNotFoundException e) {
-                System.out.println(e.getMessage());
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-    }
+    
 
     public void saveConfiguration() {
         File f;
@@ -1145,7 +1052,6 @@ public class DashBoard extends Application {
                     output.write(param2.constantRobustness + "\r\n");
                     output.write(param2.busAdress + "\r\n");
                 }
-                autosave(f.getParent(), f.getName());
                 curPath = f.getParent();
 
 

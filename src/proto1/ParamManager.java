@@ -15,8 +15,8 @@ public class ParamManager {
     //taille de la fenêtre en normal et plein écran
     public double windowSizeWidth = 330*4;
     public double windowSizeHeight = 190*4;
-    public double windowSizeWidthFull = 1920;//Toolkit.getDefaultToolkit().getScreenSize().width;
-    public double windowSizeHeightFull = 1200;//Toolkit.getDefaultToolkit().getScreenSize().height;
+    public double windowSizeWidthFull = 1280;//Toolkit.getDefaultToolkit().getScreenSize().width;
+    public double windowSizeHeightFull = 1024;//Toolkit.getDefaultToolkit().getScreenSize().height;
     public double windowBorderY = 100;
     public double windowBorderX = 200;
     
@@ -52,7 +52,7 @@ public class ParamManager {
     public int constantRobustness = 1;
     
     // adresse du bus de communication Ivy
-    public String busAdress = "127.0.0.1:2010";
+    public String busAdress = "127.255.255.255:2010";
     public ParamManager(){
         
     }

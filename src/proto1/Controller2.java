@@ -102,8 +102,8 @@ public class Controller2 extends Application implements Control {
 
 
         /// 2) Initialisation du bus de communication inter logiciel ///
-        this.adresseBus = "169.254.255.255:2010";
-        this.kinectServer = new KinectServer(this, adresseBus, windowSizeWidth, windowSizeHeight, param);
+        
+        this.kinectServer = new KinectServer(this, param.busAdress, windowSizeWidth, windowSizeHeight, param);
         //////////////////////////////////////////////////////////////
         //gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //

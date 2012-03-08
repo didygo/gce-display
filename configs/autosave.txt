@@ -1,2 +1,2 @@
 /Users/jordane/Desktop
-config1
+config2

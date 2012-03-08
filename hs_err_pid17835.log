@@ -1,0 +1,96 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=1024f0ee7, pid=17835, tid=4765265920
+#
+# JRE version: 7.0-b223
+# Java VM: OpenJDK 64-Bit Server VM (21.0-b17 mixed mode bsd-amd64 compressed oops)
+# Problematic frame:
+# V  [libjvm.dylib+0x36dee7]  Monitor::ILock(Thread*)+0x23
+#
+# Failed to write core dump. Core dumps have been disabled. To enable core dumping, try "ulimit -c unlimited" before starting Java again
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.sun.com/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread is native thread
+
+siginfo:si_signo=SIGSEGV: si_errno=0, si_code=1 (SEGV_MAPERR), si_addr=00000150
+
+Registers:
+RAX=0, RBX=0, RCX=4337285576, RDX=140219237200129
+RSP=4765265344, RBP=4765265376, RSI=0, RDI=4328632304
+R8 =160, R9 =0, R10=140219224915456, R11=4332719256
+R12=4329263008, R13=4329271200, R14=4328632304, R15=265
+RIP=4333702887, EFLAGS=66118, ERR=4
+  TRAPNO=14
+
+Top of Stack: (sp=11c082dc0)
+11c082dc0:   0000000000000000 000000010201aff0
+11c082dd0:   0000000000000000 0000000000000109
+11c082de0:   000000011c082e00 00000001024f103d
+11c082df0:   0000000000000005 000000011c083000
+11c082e00:   000000011c082e10 00000001025fbcc8
+11c082e10:   000000011c082e30 0000000102400cb7
+11c082e20:   000000011c083000 0000000000000005
+11c082e30:   000000011c082e60 000000011be6de0c
+11c082e40:   0000000101fc7000 0000000000000004
+11c082e50:   000000011c0838a8 00007fff7c17f6f8
+11c082e60:   000000011c082ea0 00007fff924e08cb
+11c082e70:   000000011c083060 0000000000000000
+11c082e80:   0000000000000000 000000011c083000
+11c082e90:   000000011c083000 0000000002000000
+11c082ea0:   000000011c082f10 00007fff9249bf7c
+11c082eb0:   00000001020b6fa0 000000011be6dcae
+11c082ec0:   000000011c082ef0 000000011bc2a79a
+11c082ed0:   0000206092498f80 00000001020b6fa0
+11c082ee0:   00007fff9249959f 000000000601001f
+11c082ef0:   0000000000008a0b 000000011c083000
+11c082f00:   00000001020b6fa0 000000011be6dcae
+11c082f10:   000000011c082f50 00007fff9249a8ca
+11c082f20:   0000000000000000 0000000000000000
+11c082f30:   0000000000000000 0000000000000000
+11c082f40:   0000000000000000 0000000000000000
+11c082f50:   000000011c082f78 00007fff9249db75
+11c082f60:   0000000000000000 0000000000000000
+11c082f70:   0000000000000000 0000000000000000
+11c082f80:   0000000000000000 0000000000000000
+11c082f90:   0000000000000000 0000000000000000
+11c082fa0:   0000000000000000 0000000000000000
+11c082fb0:   0000000000000000 0000000000000000 
+
+Instructions: (pc=1024f0ee7)
+1024f0ec7:   e5 41 57 41 56 53 48 83 ec 08 48 89 f3 49 89 fe
+1024f0ed7:   4c 89 f7 e8 6f f8 ff ff 85 c0 0f 85 01 01 00 00
+1024f0ee7:   4c 8b bb 50 01 00 00 4c 89 f7 48 89 de e8 27 fd
+1024f0ef7:   ff ff 85 c0 0f 85 e7 00 00 00 41 c7 47 20 00 00 
+
+Register to memory mapping:
+
+RAX=0 is an unknown value
+RBX=0 is an unknown value
+RCX=10285b9c8: _ZN2os16_processor_countE+0 in /Library/Java/JavaVirtualMachines/JDK 1.7.0 Developer Preview.jdk/Contents/Home/jre/lib/server/libjvm.dylib at 102183000
+RDX=140219237200129 is an unknown value
+RSP=4765265344 is pointing into the stack for thread: 140219216134144
+RBP=4765265376 is pointing into the stack for thread: 140219216134144
+RSI=0 is an unknown value
+RDI=4328632304 is an unknown value
+R8 =160 is an unknown value
+R9 =0 is an unknown value
+R10=140219224915456 is an unknown value
+R11=102400c98: jni_DetachCurrentThread+0 in /Library/Java/JavaVirtualMachines/JDK 1.7.0 Developer Preview.jdk/Contents/Home/jre/lib/server/libjvm.dylib at 102183000
+R12=4329263008 is an unknown value
+R13=4329271200 is an unknown value
+R14=4328632304 is an unknown value
+R15=265 is an unknown value
+
+
+Stack: [11c003000,11c083000],  sp=11c082dc0,  free space=511k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [libjvm.dylib+0x36dee7]  Monitor::ILock(Thread*)+0x23
+V  [libjvm.dylib+0x36e03d]  Monitor::lock_without_safepoint_check()+0x27
+V  [libjvm.dylib+0x478cc8]  VM_Exit::wait_if_vm_exited()+0x2c
+V  [libjvm.dylib+0x27dcb7]  jni_DetachCurrentThread+0x1f

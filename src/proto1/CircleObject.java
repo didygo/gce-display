@@ -95,7 +95,7 @@ public class CircleObject {
     }
 
     public boolean hitTestObject(double i, double j) {
-        Circle c = new Circle(totalGroup.getLayoutX(), totalGroup.getLayoutY(), boxSize/2.5);
+        Circle c = new Circle(totalGroup.getLayoutX(), totalGroup.getLayoutY(), boxSize/2);
         return c.contains(i, j);
     }
 

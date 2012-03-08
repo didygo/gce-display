@@ -151,7 +151,7 @@ public class Controller extends Application implements Control  {
         /// 2) Initialisation du bus de communication inter logiciel ///
         this.kinectServer = new KinectServer(this, param.busAdress, windowSizeWidth, windowSizeHeight, param);
         //////////////////////////////////////////////////////////////
-        gestionEvenementsSouris(scene);
+        //gestionEvenementsSouris(scene);
         /// 3) Initialisation des interactions pour prototype I //
         this.state = States.SUPER_FREE;
         this.basket = new Creator(root, windowSizeWidth, windowSizeHeight, param);

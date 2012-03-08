@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  *
  * @author demalejo
  */
-public class KinectServer  {
+public class KinectServer {
 
     private Ivy bus;
     private String busAdress;
@@ -20,11 +20,10 @@ public class KinectServer  {
     private double windowHeight, windowWidth, kinectWindowSizeX, kinectWindowSizeY;
     private Date dateTemp;
     private ParamManager param;
-    
 
     public KinectServer(Control c, String adresse, double wX, double wY, ParamManager param) {
         this.param = param;
-        this.ctrl =  c;
+        this.ctrl = c;
         this.busAdress = adresse;
         this.windowWidth = wX;
         this.windowHeight = wY;
@@ -43,18 +42,18 @@ public class KinectServer  {
         }
         input();
     }
-    
-    public void changeWindowSize(double x, double y){
+
+    public void changeWindowSize(double x, double y) {
         windowWidth = x;
         windowHeight = y;
     }
-    
-    public void disconnect(){
+
+    public void disconnect() {
         bus.stop();
     }
 
     public double ips() {
-        
+
         double temp = (new Date().getTime() - dateTemp.getTime());
         dateTemp = new Date();
         return temp;
@@ -74,7 +73,6 @@ public class KinectServer  {
             Logger.getLogger(KinectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
 
     public void send(String st) {
         try {
@@ -124,9 +122,6 @@ public class KinectServer  {
                 @Override
                 public void receive(IvyClient client, String[] args) {
                     //System.out.println("KINECT_2HANDS_POSITION=" + args[0]);
-
-                    
-
                 }
             });
 
@@ -160,27 +155,37 @@ public class KinectServer  {
 
                 @Override
                 public void receive(IvyClient client, String[] args) {
-                    //System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1]+ " Z=" + args[2]);
+                    //System.out.println("KINECT_POSITION X=" + args[0] + " Y=" + args[1] + " Z=" + args[2]);
 
                     double x = (double) Integer.parseInt(args[0]);
                     double y = (double) Integer.parseInt(args[1]);
                     double z = (double) Integer.parseInt(args[2]);
-                    
-                    
-                    
-                    x = (x*windowWidth)/kinectWindowSizeX +(2*x/kinectWindowSizeX - 1)*param.windowBorderX;
-                    y = (y*windowHeight)/kinectWindowSizeY + (2*y/kinectWindowSizeY - 1)*param.windowBorderY;
-                    
-                    
-                    
-                    if (x<50) x = 50;
-                    if (x>windowWidth-50) x = windowWidth-50;
-                    if (y<50) y =50;
-                    if (y>windowHeight-50) y = windowHeight-50;
-                    
-                    
+
+
+                    x = (kinectWindowSizeX * (x - param.windowBorderX) / (kinectWindowSizeX - 2 * param.windowBorderX)) * windowWidth / kinectWindowSizeX;
+                    y = (kinectWindowSizeY * (y - param.windowBorderY) / (kinectWindowSizeY - 2 * param.windowBorderY)) * windowHeight / kinectWindowSizeY;
+
+                    //x = (x*windowWidth)/kinectWindowSizeX +(2*x/kinectWindowSizeX - 1)*param.windowBorderX;
+                    //y = (y * windowHeight) / kinectWindowSizeY + (2 * y / kinectWindowSizeY - 1) * param.windowBorderY;
+
+
+
+                    if (x < 50) {
+                        x = 50;
+                    }
+                    if (x > windowWidth - 50) {
+                        x = windowWidth - 50;
+                    }
+                    if (y < 50) {
+                        y = 50;
+                    }
+                    if (y > windowHeight - 50) {
+                        y = windowHeight - 50;
+                    }
+
+                    //System.out.println("AJUSTED X=" + x + " Y=" + y + " Z=" + z);
                     //System.out.println("x=" + x + "  y="+y);
-                    ctrl.handMove(x,y,z);
+                    ctrl.handMove(x, y, z);
                 }
             });
         } catch (IvyException ex) {
@@ -203,9 +208,9 @@ public class KinectServer  {
                     }
                     //System.out.println(s);
 
-                    
+
                     ctrl.fingerAngle(Math.toRadians(Double.parseDouble(s)));
-                   
+
                 }
             });
 
